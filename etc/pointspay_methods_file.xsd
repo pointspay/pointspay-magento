@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="payment">
+        <xs:annotation>
+            <xs:documentation>
+                The root node for payment configuration
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:all>
+                <xs:element minOccurs="0" name="pointspay_methods" type="pointspay_methodsType"  />
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="pointspay_methodsType">
+        <xs:annotation>
+            <xs:documentation>
+                The containing node for a list of extra methods.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence maxOccurs="unbounded">
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="type" type="PointspayTypeType" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="PointspayTypeType">
+        <xs:annotation>
+            <xs:documentation>
+                The definition of a specific method type.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="label" type="xs:string"  />
+            <xs:element name="pointspay_code" type="xs:string" />
+            <xs:element name="sandbox" type="environmentType"/>
+            <xs:element name="live" type="environmentType"/>
+            <xs:element name="applicableCountries" type="applicableCountriesType"/>
+        </xs:all>
+        <xs:attribute name="id" type="xs:ID" use="required" />
+        <xs:attribute name="order" type="xs:integer" use="required" />
+    </xs:complexType>
+    <xs:complexType name="environmentType">
+        <xs:all>
+            <xs:element minOccurs="1" maxOccurs="1" name="baseDomain" type="xs:string"/>
+            <xs:element minOccurs="1" maxOccurs="1" name="enabled" type="xs:integer"/>
+            <xs:element minOccurs="0" maxOccurs="1" name="logo" type="xs:string"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="applicableCountriesType">
+        <xs:sequence>
+            <xs:element name="country" type="countryType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="countryType">
+        <xs:all>
+            <xs:element minOccurs="1" maxOccurs="1" name="code" type="xs:string"/>
+            <xs:element minOccurs="1" maxOccurs="1" name="name" type="xs:string"/>
+        </xs:all>
+    </xs:complexType>
+
+</xs:schema>

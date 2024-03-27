@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="pointspay_keys" resource="default" engine="innodb" comment="Pointspay Payment Keys">
+        <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Pointspay Payment Entity ID"/>
+        <column xsi:type="longtext" name="private_key" nullable="true" comment="Private key (encrypted)"/>
+        <column xsi:type="longtext" name="certificate" nullable="true" comment="Self-Signed Certificate (encrypted)"/>
+        <column xsi:type="text" name="payment_code" nullable="true" comment="Payment Code"/>
+        <column xsi:type="text" name="website_id" nullable="true" comment="Website Id"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+    </table>
+</schema>

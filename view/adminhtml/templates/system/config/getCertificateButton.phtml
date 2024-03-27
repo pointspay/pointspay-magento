@@ -1,0 +1,78 @@
+<?php /* @var $block \Pointspay\Pointspay\Block\System\Config\DownloadCertificate */ ?>
+<?php /* @var $escaper \Magento\Framework\Escaper */ ?>
+<?php
+
+if (!isset($escaper)) {
+    $escaper = $block;
+}
+?>
+<?php $uniqId = uniqid(); ?>
+<script>
+    require([
+        'jquery',
+        'Pointspay_Pointspay/js/pointspay-storage',
+        'mage/storage',
+        'mage/cookies',
+        'prototype',
+    ], function (jQuery, pointspayStorage) {
+
+        var collectSpan = jQuery("#collect_span_<?= $uniqId ?>");
+        jQuery("#<?= $uniqId ?>").click(function () {
+            collectSpan.find('.collected').hide();
+            collectSpan.find('.processing').show();
+            jQuery("#message_span_<?= $uniqId ?>").text('Downloading (<?= $uniqId ?>)');
+
+            serviceUrl = "<?= $escaper->escapeUrl($block->getActionUrl()) ?>?<?= http_build_query(['form_key' => $block->getFormKey(), 'payment_method_code' => $block->getVirtualMethodCode(), 'scope' => $block->getElementScope(), 'scope_id' => $block->getElementScopeId()])?>";
+
+            let promise = jQuery.ajax({
+                url: serviceUrl,
+                type: 'post',
+                cache: false,
+                data: {form_key: window.FORM_KEY},
+                contentType: 'application/json',
+                // beforeSend: function (xhr, ajax) {
+                //     //Empty to remove magento's default handler
+                // },
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+
+
+            promise.done(function (response) {
+                collectSpan.find('.processing').hide();
+                collectSpan.find('.collected').show();
+                jQuery("#message_span_<?= $uniqId ?>").text('Your Key will be displayed in the Downloads tab. (<?= $uniqId ?>)');
+
+                const blobWithCertificate = new Blob([response], {
+                    type: 'text/plain'
+                });
+
+                const url = window.URL.createObjectURL(blobWithCertificate);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                // the filename you want
+                a.download = '<?= $block->getVirtualMethodCode() ?>_certificate_<?= $uniqId ?>.cer';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }).fail(function () {
+                collectSpan.find('.processing').hide();
+                collectSpan.find('.collected').show();
+                jQuery("#message_span_<?= $uniqId ?>").text('Something went wrong. (<?= $uniqId ?>)');
+            });
+
+        });
+    });
+</script>
+
+<?= $block->getButtonHtml($uniqId) ?>
+<br/>
+<span class="collect-indicator" id="collect_span_<?= $uniqId ?>">
+    <img class="processing" hidden="hidden" alt="Collecting" style="margin:0 5px"
+         src="<?= $escaper->escapeUrl($block->getViewFileUrl('images/process_spinner.gif')) ?>"/>
+    <img class="collected" hidden="hidden" alt="Collected" style="margin:-3px 5px"
+         src="<?= $escaper->escapeUrl($block->getViewFileUrl('images/rule_component_apply.gif')) ?>"/>
+    <span id="message_span_<?= $uniqId ?>"></span>
+</span>

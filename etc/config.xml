@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <pointspay_required_settings>
+                <active>0</active>
+                <model>PointspayPaymentVirtualFacade</model>
+                <title>Pointspay</title>
+                <allowspecific>0</allowspecific>
+                <sort_order>1</sort_order>
+                <payment_action>initialize</payment_action>
+                <is_gateway>1</is_gateway>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_refund>1</can_refund>
+                <can_void>1</can_void>
+                <can_cancel>1</can_cancel>
+                <can_initialize>1</can_initialize>
+                <group>pointspay</group>
+                <demo_mode>0</demo_mode>
+                <request_timeout>5</request_timeout>
+            </pointspay_required_settings>
+            <pointspay_group_all_in_one>
+                <api_key>No ApiKey</api_key>
+                <request_timeout>30</request_timeout>
+            </pointspay_group_all_in_one>
+        </payment>
+    </default>
+</config>
