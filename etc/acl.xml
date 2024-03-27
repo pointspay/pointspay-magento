@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::system">
+                    <resource id="Pointspay_Pointspay::pointspay" title="Pointspay_Pointspay" translate="title" sortOrder="10">
+                        <resource id="Pointspay_Pointspay::guestMerchantAppHref" title="Get href info for guest shoppers" sortOrder="20" />
+                        <resource id="Pointspay_Pointspay::merchantAppHref" title="Get href info for logged-in shoppers" sortOrder="30" />
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

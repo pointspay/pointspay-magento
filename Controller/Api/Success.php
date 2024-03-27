@@ -1,0 +1,91 @@
+<?php
+
+namespace Pointspay\Pointspay\Controller\Api;
+
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\Controller\Result\Redirect;
+use Magento\Sales\Model\Order;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Pointspay\Pointspay\Model\Quote\RestoreData;
+use Pointspay\Pointspay\Service\Checkout\Service;
+use Psr\Log\LoggerInterface;
+
+
+class Success extends AbstractApi
+{
+
+    /**
+     * @var Order
+     */
+    protected $_orderManager;
+
+    /**
+     * @var checkoutSession
+     */
+    protected $_checkoutSession;
+
+    /**
+     * @param Context $context
+     * @param RestoreData $restoreData
+     * @param LoggerInterface $logger
+     * @param Service $service
+     * @param Redirect $resultRedirectFactory
+     * @param Order $orderManager
+     * @param CheckoutSession $checkoutSession
+     */
+    public function __construct(
+        Context $context,
+        RestoreData $restoreData,
+        LoggerInterface $logger,
+        Service $service,
+        Redirect $resultRedirectFactory,
+        Order               $orderManager,
+        CheckoutSession     $checkoutSession
+    ){
+          parent::__construct($context, $restoreData, $logger, $service, $resultRedirectFactory);
+        $this->_orderManager        = $orderManager;
+        $this->_checkoutSession     = $checkoutSession;
+    }
+
+
+
+    public function execute()
+    {
+        $content = $this->getRequest()->getContent();
+        $this->service->logPostData($content);
+
+        if($postData = $this->service->restorePostData($content))
+        {
+            $lastRealOrderId = $postData['order_id'];
+        }else{
+            $lastRealOrderId = $this->_checkoutSession->getLastRealOrderId();
+        }
+
+        $order = $this->_orderManager->loadByAttribute("increment_id", $lastRealOrderId);
+
+        if(!$order){
+            $this->_redirect("checkout/", [
+                "_secure" => true
+            ]);
+            return;
+        }
+
+        $state = $order->getState();
+        if ($state == Order::STATE_CANCELED) {
+            $this->logger->addInfo(__METHOD__ . " transaction has failed or been cancelled. Restoring the cart.");
+            $this->_restoreData->restoreCart($order);
+            $this->_redirectToCartPageWithError("Payment failed.", [],1);
+            return;
+        }
+
+        $quoteId = $order->getQuoteId();
+        $this->_checkoutSession->setLastQuoteId($quoteId);
+        $this->_checkoutSession->setLastSuccessQuoteId($quoteId);
+        $this->_checkoutSession->setLastOrderId($order->getId());
+        $this->_checkoutSession->setLastRealOrderId($order->getIncrementId());
+        $this->_checkoutSession->setLastOrderStatus($order->getStatus());
+        $this->_redirect("checkout/onepage/success", [
+                "_secure" => true
+        ]);
+    }
+}
