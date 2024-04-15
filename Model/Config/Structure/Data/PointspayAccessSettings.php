@@ -16,7 +16,7 @@ class PointspayAccessSettings extends AbstractChain implements StructureDataUpda
     protected function restructurePayments(array $config)
     {
         $sectionData = $config;
-        $startPath = 'config';
+        $startPath = 'config/system/sections/payment/children';
         $startPath = $this->arrayManager->findPath('pointspay_group_all_in_one', $sectionData, $startPath);
         foreach ($this->paymentsReader->getAvailablePointspayMethods() as $key => $method) {
             $methodCode = $method['pointspay_code'];
