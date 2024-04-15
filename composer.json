@@ -1,5 +1,5 @@
 {
-    "name": "pointspay/module-pointspay",
+    "name": "pointspay/pointspay-magento",
     "version": "2.5.8",
     "description": "Pointspay payment",
     "type": "magento2-module",
