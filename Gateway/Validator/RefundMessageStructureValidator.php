@@ -17,7 +17,8 @@ class RefundMessageStructureValidator extends AbstractValidator
             if (!isset($response['body']['status']) || $response['body']['status'] != Response::ACCEPTED_REFUND_STATUS) {
                 // this is only for old version of the PHP
                 $message = !empty($response['body']['message']) ? $response['body']['message'] : null;
-                $code = !empty($response['body']['code']) ? $response['body']['code'] : $response['status_code'];
+                $responseCode = isset($response['status_code']) ? $response['status_code'] : 'no_code';
+                $code = !empty($response['body']['code']) ? $response['body']['code'] : $responseCode;
                 return $this->createResult(false, [$message], [$code]);
             }
         }
