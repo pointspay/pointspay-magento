@@ -2,12 +2,16 @@
 
 namespace Pointspay\Pointspay\Model;
 
+use Closure;
+use Exception;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\CreditmemoSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
 use Magento\Sales\Model\Order\Status\HistoryFactory;
 use Magento\Sales\Model\OrderFactory;
+use Pointspay\Pointspay\Api\InvoiceMutexInterface;
+use Pointspay\Pointspay\Service\Api\Success\PaymentProcessor;
 use Pointspay\Pointspay\Service\Checkout\Service;
 use Psr\Log\LoggerInterface;
 
@@ -18,7 +22,7 @@ class Ipn implements \Pointspay\Pointspay\Api\IpnInterface
     /**
      * @var OrderFactory
      */
-    private $_orderFactory;
+    private $orderFactory;
 
     /**
      * @var LoggerInterface
@@ -31,243 +35,94 @@ class Ipn implements \Pointspay\Pointspay\Api\IpnInterface
     private $service;
 
     /**
-     * @var OrderSender
+     * @var \Pointspay\Pointspay\Service\Api\Success\PaymentProcessor
      */
-    private $orderSender;
+    private $paymentProcessor;
 
     /**
-     * @var Order
+     * @var \Pointspay\Pointspay\Api\InvoiceMutexInterface
      */
-    protected $_order;
-
-    /**
-     * @var array
-     */
-    private $_ipnRequest;
-
-    /**
-     * @var HistoryFactory
-     */
-    private $_orderHistoryFactory;
-
-    /**
-     * @var BuilderInterface
-     */
-    private $transactionBuilder;
+    private $invoiceMutex;
 
     /**
      * @param LoggerInterface $logger
      * @param OrderFactory $orderFactory
-     * @param OrderSender $orderSender
-     * @param CreditmemoSender $creditmemoSender
-     * @param HistoryFactory $orderHistoryFactory
      * @param Service $service
-     * @param BuilderInterface $transactionBuilder
-     * @param array $data
+     * @param \Pointspay\Pointspay\Service\Api\Success\PaymentProcessor\Ipn $paymentProcessor
+     * @param \Pointspay\Pointspay\Api\InvoiceMutexInterface $invoiceMutex
      */
 
     public function __construct(
         LoggerInterface     $logger,
         OrderFactory        $orderFactory,
-        OrderSender         $orderSender,
-        HistoryFactory      $orderHistoryFactory,
         Service             $service,
-        BuilderInterface $transactionBuilder,
-        array               $data = []
+        PaymentProcessor\Ipn $paymentProcessor,
+        InvoiceMutexInterface $invoiceMutex
     ) {
-        $this->_orderFactory        = $orderFactory;
-        $this->_orderHistoryFactory = $orderHistoryFactory;
+        $this->orderFactory = $orderFactory;
         $this->service              = $service;
         $this->logger               = $logger;
-        $this->orderSender          = $orderSender;
-        $this->_ipnRequest          = $data;
-        $this->transactionBuilder   = $transactionBuilder;
+        $this->paymentProcessor = $paymentProcessor;
+        $this->invoiceMutex = $invoiceMutex;
     }
 
     /**
-     * @param array $ipnData
+     * @param array $gatewayData
      * @return void
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function processIpnRequest($ipnData):void
+    public function processIpnRequest($gatewayData): void
     {
-        $this->_ipnRequest = $ipnData;
-
-        $this->service->logResponse('IPN response handling', $this->_ipnRequest);
-
+        $this->service->logResponse('IPN response handling', $gatewayData);
         try {
-            $this->_getOrder();
-            $this->_registerTransaction();
-        } catch (\Exception $e) {
-            $this->logger->addCritical(__METHOD__ . " Failed to init IPN", $this->_ipnRequest);
-            $this->service->logException($e->getMessage(), $this->_ipnRequest);
+            $order = $this->getOrder($gatewayData);
+            $invoiceProcessingResult = $this->invoiceMutex->execute(
+                $order->getIncrementId(),
+                Closure::fromCallable([$this, 'processInvoice']),
+                [$order, $gatewayData]
+            );
+            if (!$invoiceProcessingResult) {
+                $message = "The '{$gatewayData[Ipn::STATUS]}' payment status couldn't be handled. Order IncrementId: '{$gatewayData[Ipn::ORDER_ID]}'.";
+                $message2 = "Invoice creation during success page (IPN method) redirection process has skipped.";
+                $this->service->logException($message, $gatewayData);
+                $this->service->logException($message2, $gatewayData);
+                // phpcs:ignore Magento2.Exceptions.DirectThrow
+                throw new Exception($message);
+            }
+        } catch (Exception $e) {
+            $this->logger->addCritical(__METHOD__ . " Failed to init IPN", $gatewayData);
+            $this->service->logException($e->getMessage(), $gatewayData);
             throw $e;
         }
     }
 
-    /**
-     * Process regular IPN notifications
-     *
-     * @return void
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Exception
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     */
-    protected function _registerTransaction()
-    {
-        // Handle payment_status
-        $paymentStatus = $this->getRequestData(self::STATUS);
-        switch ($paymentStatus) {
-            case self::PAYMENTSTATUS_COMPLETED:
-                $this->_registerPaymentCapture(true);
-                break;
-            default:
-                $message ="The '{$paymentStatus}' payment status couldn't be handled. Order IncrementId: '{$this->getRequestData(self::ORDER_ID)}'.";
-                $this->service->logException($message, $this->_ipnRequest);
-                // phpcs:ignore Magento2.Exceptions.DirectThrow
-                throw new \Exception($message);
-        }
-    }
 
     /**
-     * Process completed payment (either full or partial)
-     *
-     * @param bool $skipFraudDetection
-     * @return void
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    protected function _registerPaymentCapture(bool $skipFraudDetection = false)
-    {
-        $payment = $this->createTransaction();
-        if ($this->_order->getState() === Order::STATE_PENDING_PAYMENT) {
-            $this->_order->setState(Order::STATE_PROCESSING);
-        }
-
-        $this->createInvoice($payment);
-    }
-
-    /**
-     * @return \Magento\Sales\Api\Data\OrderPaymentInterface
+     * @param array $gatewayData
+     * @return \Magento\Sales\Model\Order|null
      * @throws \Exception
      */
-    private function createTransaction()
+    protected function getOrder(array $gatewayData)
     {
-        $payment = $this->_order->getPayment();
-
-        $trans_id = $this->getRequestData(self::PAYMENT_ID);
-        $payment->setLastTransId($trans_id);
-        $payment->setTransactionId($trans_id);
-
-        $formatedPrice = $this->_order->getBaseCurrency()->formatTxt(
-            $this->_order->getGrandTotal()
-        );
-
-        $message = __('The Captured amount is %1.', $formatedPrice);
-        $trans = $this->transactionBuilder;
-        $transaction = $trans->setPayment($payment)
-            ->setOrder($this->_order)
-            ->setTransactionId($trans_id)
-            ->setAdditionalInformation(
-                [\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => (array)$payment->getAdditionalInformation()]
-            )
-            ->setFailSafe(true)
-            //build method creates the transaction and returns the object
-            ->build(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_CAPTURE);
-
-        $payment->addTransactionCommentsToOrder(
-            $transaction,
-            $message
-        );
-        $payment->setParentTransactionId(null);
-
-        $payment->save();
-        $this->_order->save();
-        $transaction->save();
-
-        return $payment;
-    }
-
-    /**
-     * @param $payment
-     * @return void
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    private function createInvoice($payment)
-    {
-        $paymentTransactionId = $payment->getTransactionId();
-        $invoice = $this->_order->prepareInvoice();
-        $invoice->getOrder()->setIsInProcess(true);
-        $invoice->setTransactionId($paymentTransactionId);
-        $invoice->register()
-            ->pay()
-            ->save();
-
-        $this->_order->save();
-
-        $message = __(
-            'Invoiced amount of %1 Transaction ID: %2',
-            $this->_order->formatPriceTxt($payment->getAmountOrdered()),
-            $paymentTransactionId
-        );
-        $this->_addHistoryComment($this->_order, $message);
-
-        if (!$this->_order->getEmailSent()) {
-            $this->orderSender->send($this->_order);
-            $history =    $this->_order->addStatusHistoryComment(
-                __('You notified customer about invoice #%1.', $invoice->getIncrementId())
-            )
-                ->setIsCustomerNotified(true);
-            $history->save();
-        }
-    }
-
-    /**
-     * Add a comment to order history
-     *
-     * @param Order $order
-     * @param string $message
-     * @throws \Exception
-     */
-    private function _addHistoryComment($order, $message)
-    {
-        $history = $this->_orderHistoryFactory->create()
-            ->setComment($message)
-            ->setEntityName('order')
-            ->setOrder($order);
-
-        $history->save();
-    }
-
-    /**
-     * IPN request data getter
-     *
-     * @param string $key
-     * @return array|string
-     */
-    public function getRequestData($key = null)
-    {
-        if (null === $key) {
-            return $this->_ipnRequest;
-        }
-        return $this->_ipnRequest[$key] ?? null;
-    }
-
-    /**
-     * Load order
-     *
-     * @return Order
-     * @throws \Exception
-     */
-    protected function _getOrder()
-    {
-        $incrementId = $this->getRequestData(self::ORDER_ID);
-        $this->_order = $this->_orderFactory->create()->loadByIncrementId($incrementId);
-        if (!$this->_order->getId()) {
+        $incrementId = $gatewayData[self::ORDER_ID];
+        $order = $this->orderFactory->create()->loadByIncrementId($incrementId);
+        if (!$order->getId()) {
             // phpcs:ignore Magento2.Exceptions.DirectThrow
             $message = sprintf('The "%s" order ID is incorrect. Verify the ID and try again.', $incrementId);
-            $this->service->logException($message, $this->_ipnRequest);
-            throw new \Exception($message);
+            $this->service->logException($message, $gatewayData);
+            throw new Exception($message);
         }
-        return $this->_order;
+        return $order;
+    }
+
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @param array $postData
+     * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    private function processInvoice(Order $order, array $postData)
+    {
+        return $this->paymentProcessor->processInvoice($order, $postData);
     }
 }

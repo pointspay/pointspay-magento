@@ -11,6 +11,10 @@
                 <attribute type="displayIn">recommended_solutions</attribute>
                 <fieldset_css>pointspay-payments complex</fieldset_css>
                 <frontend_model>Pointspay\Pointspay\Block\Adminhtml\System\Config\Fieldset</frontend_model>
+                <field id="version" translate="label" type="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Extension version</label>
+                    <frontend_model>Pointspay\Pointspay\Block\Adminhtml\System\Config\Field\Version</frontend_model>
+                </field>
                 <field id="api_key" translate="label" type="password" sortOrder="20" showInDefault="1" showInWebsite="1"
                        showInStore="0">
                     <label>API key</label>

@@ -3,6 +3,7 @@
 namespace Pointspay\Pointspay\Helper;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Component\ComponentRegistrarInterface;
 use Magento\Store\Model\ScopeInterface;
 use Pointspay\Pointspay\Api\Data\PointspayGeneralPaymentInterface;
 use Pointspay\Pointspay\Service\PaymentsReader;
@@ -20,14 +21,20 @@ class Config
      */
     private $paymentsReader;
 
+    /**
+     * @var \Magento\Framework\Component\ComponentRegistrarInterface
+     */
+    private $componentRegistrar;
+
 
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        PaymentsReader $paymentsReader
-
+        PaymentsReader $paymentsReader,
+        ComponentRegistrarInterface $componentRegistrar
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->paymentsReader = $paymentsReader;
+        $this->componentRegistrar = $componentRegistrar;
     }
 
     /**
@@ -271,6 +278,28 @@ class Config
     public function getApiKey()
     {
         return $this->scopeConfig->getValue('payment/pointspay_group_all_in_one/api_key');
+    }
+
+    /**
+     * Get Pointspay magento module's version from composer.json
+     *
+     * @return string
+     */
+    public function getModuleVersion()
+    {
+        $moduleDir = $this->componentRegistrar->getPath(
+            \Magento\Framework\Component\ComponentRegistrar::MODULE,
+            'Pointspay_Pointspay'
+        );
+
+        $composerJson = file_get_contents($moduleDir . '/composer.json');
+        $composerJson = json_decode($composerJson, true);
+
+        if (empty($composerJson['version'])) {
+            return "Version is not available in composer.json";
+        }
+
+        return $composerJson['version'];
     }
 
 }

@@ -2,10 +2,10 @@
 
 namespace Pointspay\Pointspay\Controller\Api;
 
-use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\Action;
-use Pointspay\Pointspay\Service\Checkout\Service;
+use Magento\Framework\App\Action\Context;
 use Pointspay\Pointspay\Api\IpnInterface;
+use Pointspay\Pointspay\Service\Checkout\Service;
 
 class Ipn extends Action
 {
@@ -34,11 +34,7 @@ class Ipn extends Action
     }
 
     /**
-     * @param string $orderId
-     * @param string $paymentId
-     * @param string $status
      * @return void
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute(): void
     {
@@ -48,7 +44,7 @@ class Ipn extends Action
                 'IPN header authorization',
                 ['authorization'=>$this->getRequest()->getHeader('authorization')]
             );
-        }else{
+        } else {
             $this->service->logException('IPN Empty data');
         }
         return;
@@ -61,12 +57,16 @@ class Ipn extends Action
     private function validateIpnData(string $ipnData = '')
     {
         $data = json_decode($ipnData, true);
-       if(empty($data)) return false;
-       if(!isset($data[IpnInterface::ORDER_ID])
-           || !isset($data[IpnInterface::PAYMENT_ID])
-           || !isset($data[IpnInterface::STATUS])
-       ) return false;
+        if(empty($data)) {
+            return false;
+        }
+        if(!isset($data[IpnInterface::ORDER_ID])
+            || !isset($data[IpnInterface::PAYMENT_ID])
+            || !isset($data[IpnInterface::STATUS])
+        ) {
+            return false;
+        }
 
-       return $data;
+        return $data;
     }
 }

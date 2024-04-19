@@ -360,4 +360,6 @@
             <argument name="logger" xsi:type="object">Pointspay\Pointspay\Service\Logger\Logger</argument>
         </arguments>
     </type>
+    <preference for="Pointspay\Pointspay\Api\InvoiceMutexInterface"
+                type="Pointspay\Pointspay\Service\Api\Success\InvoiceMutex"/>
 </config>
