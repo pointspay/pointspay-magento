@@ -58,8 +58,8 @@ class InstanceFactoryPlugin
         }
         if ($parentClassReflection->hasProperty("code")) {
             $property = $parentClassReflection->getProperty('code');
+            $property->setAccessible(true);
             if ($property->isInitialized($methodInstance)) {
-                $property->setAccessible(true);
                 $paymentMethodCode = $paymentMethod->getCode();
                 if (strpos($paymentMethodCode, '_required_settings') === false) {
                     $paymentMethodCode .= '_required_settings';

@@ -9,8 +9,8 @@ interface IpnInterface
     const STATUS = 'status';
 
     /**
-     * @param array $ipnData
+     * @param array $gatewayData
      * @return mixed
      */
-    public function processIpnRequest($ipnData);
+    public function processIpnRequest($gatewayData);
 }
