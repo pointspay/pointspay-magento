@@ -10,6 +10,7 @@ use Magento\Framework\App\Response\RedirectInterface;
 use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
 use Pointspay\Pointspay\Service\Checkout\Service;
+use Pointspay\Pointspay\Service\Signature\RedirectValidator;
 use Psr\Log\LoggerInterface;
 use Pointspay\Pointspay\Model\Quote\RestoreData;
 use Magento\Framework\App\RequestInterface;
@@ -43,6 +44,11 @@ abstract class AbstractApi extends Action  implements CsrfAwareActionInterface, 
     protected $service;
 
     /**
+     * @var RedirectValidator
+     */
+    protected $redirectValidator;
+
+    /**
      * @var RestoreData
      */
     protected $_restoreData;
@@ -65,12 +71,14 @@ abstract class AbstractApi extends Action  implements CsrfAwareActionInterface, 
         RestoreData             $restoreData,
         LoggerInterface         $logger,
         Service                 $service,
+        RedirectValidator       $redirectValidator,
         Redirect                $resultRedirectFactory
     ){
         $this->resultFactory        = $context->getResultFactory();
         $this->messageManager       = $context->getMessageManager();
         $this->_restoreData         = $restoreData;
         $this->service              = $service;
+        $this->redirectValidator    = $redirectValidator;
         $this->logger               = $logger;
         $this->resultRedirectFactory = $resultRedirectFactory;
         parent::__construct($context);
