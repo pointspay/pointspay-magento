@@ -91,7 +91,7 @@ class CancelTest extends TestCase
 
     public function testExecuteWithValidData()
     {
-        $postData = ['order_id' => '123', 'payment_id' => '456'];
+        $postData = ['order_id' => '123', 'payment_id' => '456', 'status'=>'SUCCESS'];
         $content = json_encode($postData);
 
         $this->requestMock->expects($this->once())

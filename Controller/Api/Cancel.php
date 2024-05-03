@@ -13,8 +13,14 @@ class Cancel extends AbstractApi
     public function execute()
     {
         $content = $this->getRequest()->getContent();
+
         $this->service->logPostData($content);
-        if($postData = $this->service->restorePostData($content))
+        $this->service->logResponse(
+            'Redirect header ',
+            ['authorization'=>$this->getRequest()->getHeader('authorization')]
+        );
+        $postData = $this->service->restorePostData($content);
+        if($this->redirectValidator->validate($this->getRequest()))
         {
             $this->_restoreData->cancelOrder($postData,'cancel');
             $message = __('Canceling a payment.');
