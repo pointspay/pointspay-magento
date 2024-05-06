@@ -13,6 +13,7 @@ use Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
 use Magento\Sales\Model\Order\Status\HistoryFactory;
 use Magento\Sales\Model\OrderFactory;
 use PHPUnit\Framework\TestCase;
+use Pointspay\Pointspay\Api\InvoiceMutexInterface;
 use Pointspay\Pointspay\Model\Ipn;
 use Pointspay\Pointspay\Service\Checkout\Service;
 use Pointspay\Pointspay\Service\Logger\Logger;
@@ -40,6 +41,7 @@ class IpnTest extends TestCase
         $logger = $this->createMock(Logger::class);
         $orderFactory = $this->createMock(OrderFactory::class);
         $service = $this->createMock(Service::class);
+        $invoiceMutex = $this->createMock(InvoiceMutexInterface::class);
         $paymentProcessor = $this->createMock(\Pointspay\Pointspay\Service\Api\Success\PaymentProcessor\Ipn::class);
 
 
@@ -100,7 +102,8 @@ class IpnTest extends TestCase
             $logger,
             $orderFactory,
             $service,
-            $paymentProcessor
+            $paymentProcessor,
+            $invoiceMutex
         );
         $ipn->processIpnRequest($ipnData);
     }
@@ -115,6 +118,7 @@ class IpnTest extends TestCase
         $service = $this->createMock(Service::class);
         $paymentProcessor = $this->createMock(\Pointspay\Pointspay\Service\Api\Success\PaymentProcessor\Ipn::class);
         $this->expectException(Exception::class);
+        $invoiceMutex = $this->createMock(InvoiceMutexInterface::class);
         $this->expectExceptionMessage('The "100000002" order ID is incorrect. Verify the ID and try again.');
 
 
@@ -139,7 +143,8 @@ class IpnTest extends TestCase
             $logger,
             $orderFactory,
             $service,
-            $paymentProcessor
+            $paymentProcessor,
+            $invoiceMutex
         );
         $ipn->processIpnRequest($ipnData);
     }
@@ -153,7 +158,7 @@ class IpnTest extends TestCase
         $orderFactory = $this->createMock(OrderFactory::class);
         $service = $this->createMock(Service::class);
         $paymentProcessor = $this->createMock(\Pointspay\Pointspay\Service\Api\Success\PaymentProcessor\Ipn::class);
-
+        $invoiceMutex = $this->createMock(InvoiceMutexInterface::class);
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("The 'FAILURE' payment status couldn't be handled. Order IncrementId: '100000001'.");
 
@@ -179,7 +184,8 @@ class IpnTest extends TestCase
             $logger,
             $orderFactory,
             $service,
-            $paymentProcessor
+            $paymentProcessor,
+            $invoiceMutex
         );
         $ipn->processIpnRequest($ipnData);
     }
