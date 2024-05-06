@@ -7,14 +7,11 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\Redirect;
 use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Email\Sender\OrderSender;
-use Magento\Sales\Model\Order\Payment\Transaction;
-use Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
 use Pointspay\Pointspay\Api\InvoiceMutexInterface;
-use Pointspay\Pointspay\Api\IpnInterface;
 use Pointspay\Pointspay\Model\Quote\RestoreData;
 use Pointspay\Pointspay\Service\Api\Success\PaymentProcessor;
 use Pointspay\Pointspay\Service\Checkout\Service;
+use Pointspay\Pointspay\Service\Signature\RedirectValidator;
 use Psr\Log\LoggerInterface;
 
 class Success extends AbstractApi
@@ -48,6 +45,9 @@ class Success extends AbstractApi
      * @param Redirect $resultRedirectFactory
      * @param Order $orderManager
      * @param CheckoutSession $checkoutSession
+     * @param PaymentProcessor $paymentProcessor
+     * @param InvoiceMutexInterface $invoiceMutex
+     * @param RedirectValidator $redirectValidator
      */
     public function __construct(
         Context $context,
@@ -58,13 +58,15 @@ class Success extends AbstractApi
         Order               $orderManager,
         CheckoutSession $checkoutSession,
         PaymentProcessor $paymentProcessor,
-        InvoiceMutexInterface $invoiceMutex
+        InvoiceMutexInterface $invoiceMutex,
+        RedirectValidator $redirectValidator
     ) {
-        parent::__construct($context, $restoreData, $logger, $service, $resultRedirectFactory);
+        parent::__construct($context, $restoreData, $logger, $service, $redirectValidator, $resultRedirectFactory);
         $this->_orderManager        = $orderManager;
         $this->_checkoutSession     = $checkoutSession;
         $this->paymentProcessor = $paymentProcessor;
         $this->invoiceMutex = $invoiceMutex;
+        $this->redirectValidator    = $redirectValidator;
     }
 
     /**
@@ -76,6 +78,16 @@ class Success extends AbstractApi
     {
         $content = $this->getRequest()->getContent();
         $this->service->logPostData($content);
+        $this->service->logResponse(
+            'Redirect header ',
+            ['authorization'=>$this->getRequest()->getHeaders()]
+        );
+
+        if(!$this->redirectValidator->validate($this->getRequest(), 1)) {
+            $this->logger->addInfo(__METHOD__ . " transaction has failed or been cancelled. Restoring the cart.");
+            $this->_redirectToCartPageWithError("Validate payment failed.", [], 1);
+            return;
+        }
 
         if ($postData = $this->service->restorePostData($content)) {
             $lastRealOrderId = $postData['order_id'];
@@ -104,7 +116,7 @@ class Success extends AbstractApi
             Closure::fromCallable([$this, 'processInvoice']),
             [$order, $postData]
         );
-        if (!$invoiceProcessingResult){
+        if (!$invoiceProcessingResult) {
             $this->logger->addInfo("Invoice creation during success page (Sale method) redirection process has skipped.");
         }
         $quoteId = $order->getQuoteId();

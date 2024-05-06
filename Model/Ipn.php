@@ -102,7 +102,7 @@ class Ipn implements \Pointspay\Pointspay\Api\IpnInterface
      * @return \Magento\Sales\Model\Order|null
      * @throws \Exception
      */
-    protected function getOrder(array $gatewayData)
+    public function getOrder(array $gatewayData)
     {
         $incrementId = $gatewayData[self::ORDER_ID];
         $order = $this->orderFactory->create()->loadByIncrementId($incrementId);

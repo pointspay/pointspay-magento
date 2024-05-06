@@ -6,6 +6,7 @@ use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Pointspay\Pointspay\Api\IpnInterface;
 use Pointspay\Pointspay\Service\Checkout\Service;
+use Pointspay\Pointspay\Service\Signature\IpnValidator;
 
 class Ipn extends Action
 {
@@ -16,6 +17,7 @@ class Ipn extends Action
     private $service;
 
     private $ipnModel;
+    private $ipnValidator;
 
     /**
      * @param Context $context
@@ -26,11 +28,13 @@ class Ipn extends Action
     public function __construct(
         Context             $context,
         Service             $service,
-        IpnInterface        $ipnModel
+        IpnInterface        $ipnModel,
+        IpnValidator        $ipnValidator
     ) {
         parent::__construct($context);
         $this->service     = $service;
         $this->ipnModel    = $ipnModel;
+        $this->ipnValidator= $ipnValidator;
     }
 
     /**
@@ -38,35 +42,17 @@ class Ipn extends Action
      */
     public function execute(): void
     {
-        if ($this->getRequest()->isPut() && $ipnData = $this->validateIpnData($this->getRequest()->getContent())) {
+        if ($this->ipnValidator->validate($this->getRequest())) {
+            $ipnData = json_decode($this->getRequest()->getContent(), true);
             $this->ipnModel->processIpnRequest($ipnData);
             $this->service->logResponse(
                 'IPN header authorization',
                 ['authorization'=>$this->getRequest()->getHeader('authorization')]
             );
         } else {
-            $this->service->logException('IPN Empty data');
+            $this->service->logException('IPN Invalid data');
         }
         return;
     }
 
-    /**
-     * @param string $ipnData
-     * @return mixed
-     */
-    private function validateIpnData(string $ipnData = '')
-    {
-        $data = json_decode($ipnData, true);
-        if(empty($data)) {
-            return false;
-        }
-        if(!isset($data[IpnInterface::ORDER_ID])
-            || !isset($data[IpnInterface::PAYMENT_ID])
-            || !isset($data[IpnInterface::STATUS])
-        ) {
-            return false;
-        }
-
-        return $data;
-    }
 }
