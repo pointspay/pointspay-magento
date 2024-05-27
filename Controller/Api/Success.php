@@ -91,8 +91,13 @@ class Success extends AbstractApi
 
         if ($postData = $this->service->restorePostData($content)) {
             $lastRealOrderId = $postData['order_id'];
-        } else {
-            $lastRealOrderId = $this->_checkoutSession->getLastRealOrderId();
+        }
+
+        if (empty($lastRealOrderId)) {
+            $this->_redirect("checkout/", [
+                "_secure" => true
+            ]);
+            return;
         }
 
         $order = $this->_orderManager->loadByAttribute("increment_id", $lastRealOrderId);
