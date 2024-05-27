@@ -40,11 +40,12 @@ class MerchantAppHref
     }
 
     /**
-     * @param $quoteId
+     * @param int|string $quoteId
+     * @param int|null $customerId
      * @return mixed
      * @throws \Exception
      */
-    public function get($quoteId)
+    public function get($quoteId, $customerId = null)
     {
         $quoteModel = $this->quoteFactory->create();
         $this->quoteResource->load($quoteModel, $quoteId);
@@ -53,7 +54,12 @@ class MerchantAppHref
         }
         $collection = $this->orderCollectionFactory->create();
         $collection->addFieldToFilter('quote_id', $quoteModel->getId());
+        if (!empty($customerId)) {
+            $collection->addFieldToFilter('customer_id', $customerId);
+        }
         $collection->addOrder('entity_id', 'DESC');
+        $collection->setPageSize(1);
+        $collection->setCurPage(1);
         $orderModel = $collection->getFirstItem();
 
         if (!$orderModel->getId()) {
