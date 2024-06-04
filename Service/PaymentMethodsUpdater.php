@@ -3,7 +3,9 @@
 namespace Pointspay\Pointspay\Service;
 
 use Magento\Framework\App\Cache\Type\Config;
+use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Io\File;
 use Magento\Framework\Module\Dir;
 use Magento\Framework\Module\Dir\Reader;
@@ -55,6 +57,11 @@ class PaymentMethodsUpdater
     private $logger;
 
     /**
+     * @var \Magento\Framework\Filesystem
+     */
+    private $filesystem;
+
+    /**
      * @param \Magento\Framework\App\Cache\Type\Config $configCacheType
      * @param \Magento\Framework\Module\Dir\Reader $moduleReader
      * @param \Magento\Framework\Filesystem\Io\File $filesystemIo
@@ -69,7 +76,8 @@ class PaymentMethodsUpdater
         ApiInterface $api,
         SerializerInterface $serializer,
         ExecutionChain $executionChainDataModifier,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        Filesystem $filesystem
     ) {
         $this->configCacheType = $configCacheType;
         $this->moduleReader = $moduleReader;
@@ -78,6 +86,7 @@ class PaymentMethodsUpdater
         $this->serializer = $serializer;
         $this->executionChainDataModifier = $executionChainDataModifier;
         $this->logger = $logger;
+        $this->filesystem = $filesystem;
     }
 
     /**
@@ -88,8 +97,14 @@ class PaymentMethodsUpdater
      */
     public function execute()
     {
-        $etcDir = $this->moduleReader->getModuleDir(Dir::MODULE_ETC_DIR, 'Pointspay_Pointspay');
-        $availableMethodsFile = $etcDir . '/pointspay_methods_available.xml';
+        $mediaAbsPath = sprintf('/%s%s', trim($this->filesystem->getDirectoryRead(DirectoryList::MEDIA)->getAbsolutePath('pointspay'), '/'), '/');
+        $availableMethodsFile = sprintf('%s%s', $mediaAbsPath, 'pointspay_methods_available.xml');
+
+        $pubFolderExist = $this->filesystem->getDirectoryRead(DirectoryList::MEDIA)->isExist($mediaAbsPath);
+        if ($pubFolderExist === false) {
+            $this->filesystem->getDirectoryWrite(DirectoryList::MEDIA)->create('pointspay');
+        }
+
         $contentFromApi = $this->api->getPaymentMethods();
         $this->logger->addInfo('Content from API', $contentFromApi);
         $filteredContentFromApi = $this->filterContent($contentFromApi);
@@ -98,8 +113,9 @@ class PaymentMethodsUpdater
         $content = $xmlContents->asXML();
         $this->logger->addInfo('XML Result', ['content' => $content]);
         $this->filesystemIo->write($availableMethodsFile, $content);
-        $this->filesystemIo->rm($etcDir . '/pointspay_methods.xml');
-        $this->filesystemIo->cp($availableMethodsFile, $etcDir . '/pointspay_methods.xml');
+
+        $filename = sprintf('%s%s', $mediaAbsPath, 'pointspay_methods.xml');
+        $this->filesystemIo->cp($availableMethodsFile, $filename);
         $this->filesystemIo->rm($availableMethodsFile);
         $this->configCacheType->clean(Zend_Cache::CLEANING_MODE_MATCHING_ANY_TAG, ['payment_config', 'pointspay_payment_config', 'config']);
         // no need to add the data inside chain because you MUST use interfaces like \Magento\Framework\App\Config\Storage\WriterInterface

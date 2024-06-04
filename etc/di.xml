@@ -176,6 +176,7 @@
     <type name="Pointspay\Pointspay\Model\Config\Reader">
         <arguments>
             <argument name="fileName" xsi:type="string">pointspay_methods.xml</argument>
+            <argument name="fileResolver" xsi:type="object">Pointspay\Pointspay\Service\PaymentMethodsUpdater\FileResolver</argument>
             <argument name="converter" xsi:type="object">Pointspay\Pointspay\Model\Config\Converter</argument>
             <argument name="schemaLocator" xsi:type="object">Pointspay\Pointspay\Model\Config\SchemaLocator</argument>
         </arguments>
