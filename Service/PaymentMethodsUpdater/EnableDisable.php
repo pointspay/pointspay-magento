@@ -92,7 +92,7 @@ class EnableDisable implements PaymentMethodsUpdaterInterface
         if (count($processedKeysFromDB) > 0) {
             foreach ($processedKeysFromDB as $processedKeyFromDB) {
                 $methodCode = $processedKeyFromDB;
-                if (strpos($methodCode, '_required_settings') == false) {
+                if (strpos($methodCode, '_required_settings') === false) {
                     $methodCode = $methodCode . '_required_settings';
                 }
                 $this->configWriter->save('payment/' . $methodCode . '/active', '0');
@@ -103,7 +103,7 @@ class EnableDisable implements PaymentMethodsUpdaterInterface
         }
         foreach ($disabledMethodsByApi as $disabledMethodByApi) {
             $methodCode = $disabledMethodByApi;
-            if (strpos($methodCode, '_required_settings') == false) {
+            if (strpos($methodCode, '_required_settings') === false) {
                 $methodCode = $methodCode . '_required_settings';
             }
             $this->configWriter->save('payment/' . $methodCode . '/active', '0');

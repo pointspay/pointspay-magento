@@ -8,6 +8,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\ResultFactory;
 use Pointspay\Pointspay\Service\CertificateHandler;
 
 class Download extends Action implements HttpPostActionInterface, CsrfAwareActionInterface
@@ -35,20 +36,11 @@ class Download extends Action implements HttpPostActionInterface, CsrfAwareActio
         }
         $merchantOauthData = $this->certificateHandler->get($paymentMethodCode, $scopeId);
         $content = $merchantOauthData->getCertificate();
-        $this->header('Content-Type: text/plain', true);
-        echo $content;
-        $this->exit(0);
-    }
-
-    protected function header($header, $replace = true, $httpResponseCode = 0)
-    {
-        header($header, $replace, $httpResponseCode);
-        return $this;
-    }
-
-    protected function exit($code)
-    {
-        exit($code);
+        $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+        $result->setHttpResponseCode(200);
+        $result->setHeader('Content-Type', 'text/plain', true);
+        $result->setContents($content);
+        return $result;
     }
 
     public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
