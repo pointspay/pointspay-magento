@@ -71,7 +71,7 @@ class Country implements PaymentMethodsUpdaterInterface
                 $countriesList[] = $value['code'];
             });
             $methodCode = $method['pointspay_code'];
-            if (strpos($methodCode, '_required_settings') == false) {
+            if (strpos($methodCode, '_required_settings') === false) {
                 $methodCode = $methodCode . '_required_settings';
             }
             $this->configWriter->save('payment/' . $methodCode . '/allowspecific', 1);
