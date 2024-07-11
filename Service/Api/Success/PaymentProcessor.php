@@ -59,6 +59,7 @@ class PaymentProcessor
         if ($order->canInvoice() && !$order->hasInvoices() && $gatewayData[Ipn::STATUS] === Ipn::PAYMENTSTATUS_COMPLETED) {
             if ($order->getState() === Order::STATE_PENDING_PAYMENT) {
                 $order->setState(Order::STATE_PROCESSING);
+                $order->setStatus(Order::STATE_PROCESSING);
             }
             $payment = $this->createTransaction($order, $gatewayData);
             $this->createInvoice($order, $payment);

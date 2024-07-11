@@ -2,6 +2,7 @@
 
 namespace Pointspay\Pointspay\Gateway\Response;
 use Magento\Sales\Api\Data\TransactionInterface;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 use Pointspay\Pointspay\Model\Ui\PointspayVirtualConfigProvider;
 use Magento\Payment\Gateway\Helper\SubjectReader;
@@ -17,6 +18,11 @@ class VirtualPaymentResponseHandler implements HandlerInterface
     public function handle(array $handlingSubject, array $response)
     {
         $paymentDataObject = SubjectReader::readPayment($handlingSubject);
+        $stateObject = SubjectReader::readStateObject($handlingSubject);
+
+        $stateObject->setState(Order::STATE_PENDING_PAYMENT);
+        $stateObject->setStatus(Order::STATE_PENDING_PAYMENT);
+        $stateObject->setData('is_notified', false);
 
         $payment = $paymentDataObject->getPayment();
         $payment->setIsTransactionPending(true);
