@@ -25,6 +25,9 @@ class PointspayRequiredSettings extends AbstractChain implements StructureDataUp
             if (!$this->arrayManager->exists($startPath . '/children/' . PointspayGeneralPaymentInterface::POINTSPAY_GENERAL_SETTINGS . '/children/' . $methodCodeForAccess, $sectionData)) {
                 $valueToClone = $this->arrayManager->get($startPath . '/children/' . PointspayGeneralPaymentInterface::POINTSPAY_GENERAL_SETTINGS . '/children/' . PointspayGeneralPaymentInterface::POINTSPAY_REQUIRED_SETTINGS, $sectionData);
                 $valueToClone['id'] = $methodCodeForAccess;
+                if (!isset($valueToClone['path'])){
+                    continue;
+                }
                 //correcting config path for correct saving
                 $valueToClone['path'] = str_replace(PointspayGeneralPaymentInterface::POINTSPAY_GENERAL_SETTINGS, $methodCode . '_general_settings', $valueToClone['path']);
                 // no need to clone label because it will replace "Basic Settings" label

@@ -44,10 +44,8 @@ class ShopCodeDataBuilder implements BuilderInterface
         $paymentDataObject = SubjectReader::readPayment($buildSubject);
         $order = $paymentDataObject->getOrder();
         $storeId = $order->getStoreId();
-        $website = $this->storeManager->getStore($storeId)->getWebsite();
-        $websiteId = $website->getId();
         $paymentCode = $paymentDataObject->getPayment()->getMethod();
-        $shopCode = $this->config->getShopCode($paymentCode, $websiteId);
+        $shopCode = $this->config->getShopCode($paymentCode, $storeId);
         $request['body']['shop_code'] = $shopCode;
         return $request;
     }

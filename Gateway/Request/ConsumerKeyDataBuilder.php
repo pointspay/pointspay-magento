@@ -44,9 +44,8 @@ class ConsumerKeyDataBuilder implements BuilderInterface
         $paymentDataObject = SubjectReader::readPayment($buildSubject);
         $order = $paymentDataObject->getOrder();
         $storeId = $order->getStoreId();
-        $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
         $paymentCode = $paymentDataObject->getPayment()->getMethod();
-        $consumerKey = $this->config->getConsumerKey($paymentCode, $websiteId);
+        $consumerKey = $this->config->getConsumerKey($paymentCode, $storeId);
         $request['clientConfig']['oauth']['consumer_key'] = $consumerKey;
         return $request;
     }
