@@ -53,13 +53,14 @@ class RedirectValidator
      * @param RequestInterface $request
      * @return bool
      */
-    public function validate($request, $success = 0): bool
+    public function validate($request): bool
     {
         $bodyContent = $request->getContent();
         $postData = $this->service->restorePostData($bodyContent);
-        if(!$this->validatePostData($postData, $success)) return false;
-
-        $signature = ($success)?base64_decode($postData[IpnInterface::OAUTH_SIGNATURE]):base64_decode($postData[IpnInterface::OAUTHSIGNATURE]);
+        if (!$this->validatePostData($postData)) {
+            return false;
+        }
+        $signature = $this->getSignature($postData);
         $publicCertificate = $this->getCertificate($postData);
         $messageToVerify = $postData[IpnInterface::ORDER_ID].$postData[IpnInterface::PAYMENT_ID].$postData[IpnInterface::STATUS].$postData[IpnInterface::AUTHORIZATION];
         $validationResult = openssl_verify($messageToVerify, $signature, $publicCertificate, 'sha256WithRSAEncryption');
@@ -72,14 +73,23 @@ class RedirectValidator
      * @param  int $success
      * @return bool
      */
-    private function validatePostData($data, $success = 0):bool
+    private function validatePostData($data): bool
     {
         if(empty($data)) {
             return false;
         }
-        if(!$success && !isset($data[IpnInterface::OAUTHSIGNATURE])){
-            return false;
-        }elseif($success && !isset($data[IpnInterface::OAUTH_SIGNATURE])){
+        $oauthCheck = false;
+        if (!isset($data[IpnInterface::OAUTHSIGNATURE])) {
+            $oauthCheck |= false;
+        } else {
+            $oauthCheck |= true;
+        }
+        if (!isset($data[IpnInterface::OAUTH_SIGNATURE])) {
+            $oauthCheck |= false;
+        } else {
+            $oauthCheck |= true;
+        }
+        if (!$oauthCheck){
             return false;
         }
         if(!isset($data[IpnInterface::ORDER_ID])
@@ -116,6 +126,21 @@ class RedirectValidator
         }
 
         return $certificate;
+    }
+
+    /**
+     * @param $postData
+     * @return false|string
+     */
+    protected function getSignature($postData)
+    {
+        if (isset($postData[IpnInterface::OAUTH_SIGNATURE])) {
+            return base64_decode($postData[IpnInterface::OAUTH_SIGNATURE]);
+        }
+        if (isset($postData[IpnInterface::OAUTHSIGNATURE])) {
+            return base64_decode($postData[IpnInterface::OAUTHSIGNATURE]);
+        }
+        return '';
     }
 
 }

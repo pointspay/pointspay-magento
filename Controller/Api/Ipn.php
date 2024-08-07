@@ -63,7 +63,7 @@ class Ipn extends Action
             }
         } else {
             $rawResult = $this->resultFactory->create(ResultFactory::TYPE_RAW);
-            $rawResult->setHttpResponseCode(403);
+            $rawResult->setHttpResponseCode(400);
             $rawResult->setContents('Invalid signature data');
             return $rawResult;
         }
