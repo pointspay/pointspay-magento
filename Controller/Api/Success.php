@@ -83,7 +83,7 @@ class Success extends AbstractApi
             ['authorization'=>$this->getRequest()->getHeaders()]
         );
 
-        if(!$this->redirectValidator->validate($this->getRequest(), 1)) {
+        if(!$this->redirectValidator->validate($this->getRequest())) {
             $this->logger->addInfo(__METHOD__ . " transaction has failed or been cancelled. Restoring the cart.");
             $this->_redirectToCartPageWithError("Validate payment failed.", [], 1);
             return;
