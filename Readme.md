@@ -1,0 +1,1 @@
+# Pointspay Magento Plugin
