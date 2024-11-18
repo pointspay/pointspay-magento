@@ -61,8 +61,7 @@ class File extends \Magento\Config\Model\Config\Backend\File
                 $uploader->addValidateCallback('size', $this, 'validateMaxSize');
                 $uploader->setScope($this->getScope());
                 $uploader->setScopeId($this->getScopeId());
-                //group id is always payment method code
-                $uploader->setCode($this->getGroupId());
+                $uploader->setCode($this->getPath());
                 $result = $uploader->saveCertificate();
                 if ($result) {
                     $this->setValue($result);

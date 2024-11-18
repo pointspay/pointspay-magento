@@ -106,23 +106,7 @@ class Adapter extends \Magento\Payment\Model\Method\Adapter
      */
     public function getTitle()
     {
-        $paymentCodeToCheck = $this->getCode();
-        $listOfEnabledPaymentMethodsArr = [];
-        $paymentCodeWithoutSuffix = str_replace('_required_settings', '', $paymentCodeToCheck);
-        if (!empty(static::$paymentCache)) {
-            $listOfEnabledPaymentMethodsArr = static::$paymentCache;
-        } else {
-            $listOfEnabledPaymentMethods = $this->configHelper->getEnabledPaymentMethodsDetails();
-            foreach ($listOfEnabledPaymentMethods as $enabledPaymentMethod) {
-                $listOfEnabledPaymentMethodsArr[$enabledPaymentMethod['pointspay_code']] = $enabledPaymentMethod['name'] ?: $enabledPaymentMethod['title'];
-            }
-            static::$paymentCache = $listOfEnabledPaymentMethodsArr;
-        }
-        if (in_array($paymentCodeWithoutSuffix, array_keys($listOfEnabledPaymentMethodsArr))) {
-            return static::$paymentCache[$paymentCodeWithoutSuffix];
-        } else {
-            return $this->getConfiguredValue('title');
-        }
+        return $this->getConfiguredValue('title');
     }
 
     /**
@@ -156,40 +140,7 @@ class Adapter extends \Magento\Payment\Model\Method\Adapter
      */
     public function isAvailable(CartInterface $quote = null)
     {
-        if (!$this->isActive($quote ? $quote->getStoreId() : null)) {
-            return false;
-        }
-
-        $checkResult = new DataObject();
-        $checkResult->setData('is_available', true);
-        try {
-            $infoInstance = $this->getInfoInstance();
-            if ($infoInstance !== null) {
-                $validator = $this->getValidatorPool()->get('availability');
-                $result = $validator->validate(
-                    [
-                        'payment' => $this->paymentDataObjectFactory->create($infoInstance)
-                    ]
-                );
-
-                $checkResult->setData('is_available', $result->isValid());
-            }
-            // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock
-        } catch (Exception $e) {
-            // pass
-        }
-
-        // for future use in observers
-        $this->eventManager->dispatch(
-            'payment_method_is_active',
-            [
-                'result' => $checkResult,
-                'method_instance' => $this,
-                'quote' => $quote
-            ]
-        );
-
-        return $checkResult->getData('is_available');
+        return true;
     }
 
     /**
@@ -197,22 +148,12 @@ class Adapter extends \Magento\Payment\Model\Method\Adapter
      */
     public function isActive($storeId = null)
     {
-        return (bool)$this->getConfiguredValue('active', $storeId);
+        return true;
     }
 
     public function canUseForCountry($country)
     {
-        try {
-            $validator = $this->getValidatorPool()->get('country');
-        } catch (Exception $e) {
-            return true;
-        }
-
-        $config = $this->configFactory->create(['methodCode' => $this->getCode()]);
-        $validator->setConfig($config);
-
-        $result = $validator->validate(['country' => $country, 'storeId' => $this->getStore(), 'pp_code' => $this->getCode()]);
-        return $result->isValid();
+        return true;
     }
 
     /**

@@ -16,6 +16,7 @@ use Pointspay\Pointspay\Service\PaymentMethodsUpdater\ExecutionChain;
 use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 use Zend_Cache;
+use Magento\Framework\App\Config\Storage\WriterInterface;
 
 class PaymentMethodsUpdater
 {
@@ -62,6 +63,11 @@ class PaymentMethodsUpdater
     private $filesystem;
 
     /**
+     * @var \Magento\Framework\App\Config\Storage\WriterInterface
+     */
+    private $configWriter;
+
+    /**
      * @param \Magento\Framework\App\Cache\Type\Config $configCacheType
      * @param \Magento\Framework\Module\Dir\Reader $moduleReader
      * @param \Magento\Framework\Filesystem\Io\File $filesystemIo
@@ -70,15 +76,17 @@ class PaymentMethodsUpdater
      * @param \Pointspay\Pointspay\Service\PaymentMethodsUpdater\ExecutionChain $executionChainDataModifier
      */
     public function __construct(
-        Config $configCacheType,
-        Reader $moduleReader,
-        File $filesystemIo,
-        ApiInterface $api,
+        Config              $configCacheType,
+        Reader              $moduleReader,
+        File                $filesystemIo,
+        ApiInterface        $api,
         SerializerInterface $serializer,
-        ExecutionChain $executionChainDataModifier,
-        LoggerInterface $logger,
-        Filesystem $filesystem
-    ) {
+        ExecutionChain      $executionChainDataModifier,
+        LoggerInterface     $logger,
+        Filesystem          $filesystem,
+        WriterInterface     $configWriter
+    )
+    {
         $this->configCacheType = $configCacheType;
         $this->moduleReader = $moduleReader;
         $this->filesystemIo = $filesystemIo;
@@ -87,6 +95,7 @@ class PaymentMethodsUpdater
         $this->executionChainDataModifier = $executionChainDataModifier;
         $this->logger = $logger;
         $this->filesystem = $filesystem;
+        $this->configWriter = $configWriter;
     }
 
     /**
@@ -97,29 +106,19 @@ class PaymentMethodsUpdater
      */
     public function execute()
     {
-        $mediaAbsPath = sprintf('/%s%s', trim($this->filesystem->getDirectoryRead(DirectoryList::MEDIA)->getAbsolutePath('pointspay'), '/'), '/');
-        $availableMethodsFile = sprintf('%s%s', $mediaAbsPath, 'pointspay_methods_available.xml');
-
-        $pubFolderExist = $this->filesystem->getDirectoryRead(DirectoryList::MEDIA)->isExist($mediaAbsPath);
-        if ($pubFolderExist === false) {
-            $this->filesystem->getDirectoryWrite(DirectoryList::MEDIA)->create('pointspay');
-        }
 
         $contentFromApi = $this->api->getPaymentMethods();
         $this->logger->addInfo('Content from API', $contentFromApi);
         $filteredContentFromApi = $this->filterContent($contentFromApi);
         $this->logger->addInfo('Filtered content from API', $filteredContentFromApi);
-        $xmlContents = $this->createXmlByData($filteredContentFromApi);
-        $content = $xmlContents->asXML();
-        $this->logger->addInfo('XML Result', ['content' => $content]);
-        $this->filesystemIo->write($availableMethodsFile, $content);
 
-        $filename = sprintf('%s%s', $mediaAbsPath, 'pointspay_methods.xml');
-        $this->filesystemIo->cp($availableMethodsFile, $filename);
-        $this->filesystemIo->rm($availableMethodsFile);
+        // save JSON encoded data to database
+        $jsonEncodedData = $this->serializer->serialize($filteredContentFromApi);
+        $this->logger->addInfo('JSON Result', ['content' => $jsonEncodedData]);
+        $this->configWriter->save('payment/pointspay_available_methods_list', $jsonEncodedData);
         $this->configCacheType->clean(Zend_Cache::CLEANING_MODE_MATCHING_ANY_TAG, ['payment_config', 'pointspay_payment_config', 'config']);
-        // no need to add the data inside chain because you MUST use interfaces like \Magento\Framework\App\Config\Storage\WriterInterface
-        // please DON'T use \Pointspay\Pointspay\Model\Framework\App\Config\Initital\ConverterPlugin::afterConvert to save the data
+        $this->configCacheType->clean(Zend_Cache::CLEANING_MODE_MATCHING_ANY_TAG, ['payment_config', 'pointspay_payment_config', 'config']);
+
         $this->executionChainDataModifier->execute();
     }
 
@@ -138,6 +137,8 @@ class PaymentMethodsUpdater
                 if (isset($value['code']) && strtoupper($value['code']) == 'PP') {
                     $value['code'] = 'pointspay';
                 }
+
+                $value['code'] = strtolower($value['code']);
 
                 if (
                     (isset($value['live']['enabled']) && $value['live']['enabled'] == false)
@@ -162,95 +163,5 @@ class PaymentMethodsUpdater
         } else {
             return $contentFromApi;
         }
-    }
-
-    /**
-     * @param array $data
-     * @return \SimpleXMLElement
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function createXmlByData($data)
-    {
-        // in this way because with addChild() method it is not possible to add attributes in a correct way for example
-        // xsi:noNamespaceSchemaLocation without xsi prefix
-        // xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" without xmlns prefix
-        $xmlStr = <<<XML
-<?xml version='1.0'?>
-<payment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="urn:magento:module:Pointspay_Pointspay:etc/pointspay_methods.xsd">
-<pointspay_methods></pointspay_methods>
-</payment>
-XML;
-        $xml = new SimpleXMLElement($xmlStr);
-        foreach ($data as $key => $value) {
-            $type = $xml->pointspay_methods->addChild('type');
-            $type->addAttribute('id', strtolower($value['code']));
-            $type->addAttribute('order', $key);
-            $type->addChild('label', $value['name']);
-            $type->addChild('pointspay_code', strtolower($value['code']));
-            $sandbox = $type->addChild('sandbox');
-            $this->assocToXml($value['sandbox'], 'sandbox', $sandbox);
-            $live = $type->addChild('live');
-            $this->assocToXml($value['live'], 'live', $live);
-            $applicableCountries = $type->addChild('applicableCountries');
-            foreach ($value['applicableCountries'] as $countryKey => $countryValue) {
-                $country = $applicableCountries->addChild('country');
-                $country->addChild('code', $countryValue['code']);
-                $country->addChild('name', $countryValue['name']);
-            }
-        }
-        return $xml;
-    }
-
-    /**
-     * Function, that actually recursively transforms array to xml
-     *
-     * @param array $array
-     * @param string $rootName
-     * @param \SimpleXMLElement $xml
-     * @return \SimpleXMLElement
-     * @throws LocalizedException
-     */
-    private function assocToXml($array, $rootName, SimpleXMLElement $xml)
-    {
-        $hasNumericKey = false;
-        $hasStringKey = false;
-        if (!is_array($array)) {
-            $array = (array)$array;
-        }
-        foreach ($array as $key => $value) {
-            if (!is_array($value)) {
-                if (is_string($key)) {
-                    if ($key === $rootName) {
-                        throw new LocalizedException(
-                            new Phrase(
-                                "An associative key can't be the same as its parent associative key. "
-                                . "Verify and try again."
-                            )
-                        );
-                    }
-                    $hasStringKey = true;
-                    if (is_bool($value)) {
-                        // Convert boolean to string boolean due to XML limitations of boolean values
-                        $value = $value ? 1 : 0;
-                    }
-                    $xml->addChild($key, $value);
-                } elseif (is_int($key)) {
-                    $hasNumericKey = true;
-                    $xml->addChild($key, $value);
-                }
-            } else {
-                $xml->addChild($key);
-                self::assocToXml($value, $key, $xml->{$key});
-            }
-        }
-        if ($hasNumericKey && $hasStringKey) {
-            throw new LocalizedException(
-                new Phrase(
-                    "Associative and numeric keys can't be mixed at one level. Verify and try again."
-                )
-            );
-        }
-        return $xml;
     }
 }

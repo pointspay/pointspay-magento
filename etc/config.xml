@@ -3,7 +3,7 @@
     <default>
         <payment>
             <pointspay_required_settings>
-                <active>0</active>
+                <active>1</active>
                 <model>PointspayPaymentVirtualFacade</model>
                 <title>Pointspay</title>
                 <allowspecific>0</allowspecific>
@@ -21,10 +21,6 @@
                 <demo_mode>0</demo_mode>
                 <request_timeout>5</request_timeout>
             </pointspay_required_settings>
-            <pointspay_group_all_in_one>
-                <api_key>No ApiKey</api_key>
-                <request_timeout>30</request_timeout>
-            </pointspay_group_all_in_one>
         </payment>
     </default>
 </config>

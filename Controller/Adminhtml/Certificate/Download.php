@@ -31,9 +31,7 @@ class Download extends Action implements HttpPostActionInterface, CsrfAwareActio
     {
         $scopeId = $this->getRequest()->getParam('scope_id') ?: 0;
         $paymentMethodCode = $this->getRequest()->getParam('payment_method_code');
-        if (strpos($paymentMethodCode, '_required_settings') === false) {
-            $paymentMethodCode .= '_required_settings';
-        }
+
         $merchantOauthData = $this->certificateHandler->get($paymentMethodCode, $scopeId);
         $content = $merchantOauthData->getCertificate();
         $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);

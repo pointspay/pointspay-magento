@@ -18,7 +18,7 @@ class PaymentCodeDataBuilder implements BuilderInterface
     {
         /** @var PaymentDataObject $paymentDataObject */
         $paymentDataObject = SubjectReader::readPayment($buildSubject);
-        $paymentCode = $paymentDataObject->getPayment()->getMethod();
+        $paymentCode = $paymentDataObject->getPayment()->getAdditionalInformation('pointspay_flavor') . '_required_settings';
         $request['clientConfig']['payment_code'] = $paymentCode;
         return $request;
     }

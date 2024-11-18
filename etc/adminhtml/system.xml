@@ -31,7 +31,14 @@
                     <label></label>
                     <frontend_model>Pointspay\Pointspay\FetchPaymentMethods</frontend_model>
                 </field>
-                <include path="Pointspay_Pointspay::system/pointspay_general_settings.xml"/>
+                <group id="pointspay_method_settings" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <attribute type="expanded">1</attribute>
+                    <clone_fields>1</clone_fields>
+                    <clone_model>Pointspay\Pointspay\Block\Adminhtml\System\Config\CustomCloneModel</clone_model>
+                    <label>Available payment methods</label>
+                    <fieldset_css>pointspay-payments complex</fieldset_css>
+                    <frontend_model>Pointspay\Pointspay\Block\Adminhtml\System\Config\CustomFieldset</frontend_model>
+                </group>
             </group>
         </section>
     </system>

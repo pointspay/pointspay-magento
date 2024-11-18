@@ -1,10 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <type name="Magento\Config\Model\Config\Structure\Data">
-        <plugin name="pp_config_model_config_structure_data_plugin" type="Pointspay\Pointspay\Model\Config\Structure\Data" sortOrder="100"/>
-    </type>
-
     <virtualType name="Pointspay\Pointspay\FetchPaymentMethods" type="Pointspay\Pointspay\Block\System\Config\Collect">
         <arguments>
             <argument name="actionPath" xsi:type="string">pointspay/refresh/payments</argument>
@@ -21,9 +17,4 @@
             <argument name="template" xsi:type="string">Pointspay_Pointspay::system/config/getCertificateButton.phtml</argument>
         </arguments>
     </virtualType>
-    <type name="Magento\Payment\Block\Form\Container">
-        <plugin name="pp_payment_block_form_container_plugin"
-                type="Pointspay\Pointspay\Block\Payment\Block\Form\ContainerPlugin"
-                sortOrder="100"/>
-    </type>
 </config>

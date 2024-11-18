@@ -61,9 +61,7 @@ class CertificateHandler
      */
     public function get($code, $websiteId = null)
     {
-        if (strpos($code, '_required_settings') === false) {
-            $code .= '_required_settings';
-        }
+        $code .= '_required_settings';
         $collection = $this->collectionFactory->create();
         $collection->setOrder('website_id', 'DESC');
         $collection->addFieldToFilter('payment_code', $code);

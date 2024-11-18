@@ -53,7 +53,7 @@ class PrivateKeyDataBuilder implements BuilderInterface
         /** @var PaymentDataObject $paymentDataObject */
         $paymentDataObject = SubjectReader::readPayment($buildSubject);
         $order = $paymentDataObject->getOrder();
-        $paymentCode = $paymentDataObject->getPayment()->getMethod();
+        $paymentCode = $paymentDataObject->getPayment()->getAdditionalInformation('pointspay_flavor');
         $storeId = $order->getStoreId();
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
         $keychain = $this->certificateHandler->get($paymentCode, $websiteId);

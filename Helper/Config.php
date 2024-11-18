@@ -154,9 +154,7 @@ class Config
      */
     public function getShopCode($subPaymentCode = PointspayGeneralPaymentInterface::POINTSPAY_REQUIRED_SETTINGS, $storeId = null)
     {
-        if (strpos($subPaymentCode, '_required_settings') === false) {
-            $subPaymentCode .= '_required_settings';
-        }
+        $subPaymentCode .= '_required_settings';
         $path = "payment/{$subPaymentCode}/shop_code";
         return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
     }
@@ -168,10 +166,7 @@ class Config
      */
     public function getConsumerKey($subPaymentCode = PointspayGeneralPaymentInterface::POINTSPAY_REQUIRED_SETTINGS, $storeId = null)
     {
-        $subPaymentCode = str_replace('_required_settings', '', $subPaymentCode);
-        if (strpos($subPaymentCode, '_access_settings') === false) {
-            $subPaymentCode .= '_access_settings';
-        }
+        $subPaymentCode .= '_access_settings';
         $path = "payment/{$subPaymentCode}/consumer_key";
         return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
     }
@@ -183,49 +178,9 @@ class Config
      */
     public function getPointspayCertificate($subPaymentCode = PointspayGeneralPaymentInterface::POINTSPAY_REQUIRED_SETTINGS, $storeId = null)
     {
-        $subPaymentCode = str_replace('_required_settings', '', $subPaymentCode);
-        if (strpos($subPaymentCode, '_access_settings') === false) {
-            $subPaymentCode .= '_access_settings';
-        }
+        $subPaymentCode .= '_access_settings';
         $path = "payment/{$subPaymentCode}/certificate";
         return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
-    }
-
-    /**
-     * @return array
-     */
-    public function getEnabledPaymentMethodsDetails()
-    {
-        $payments = [];
-        foreach ($this->paymentsReader->getAvailablePointspayMethods() as $key => $method) {
-            if (!$this->isEnabledPayment($method['pointspay_code'])) {
-                continue;
-            }
-            $method['title'] = $this->getSubPaymentTitle($method['pointspay_code']) ?? $method['name'];
-            $method['code'] = $method['pointspay_code'] . '_required_settings';
-            $method['isActive'] = true;
-            $languageCode = $this->scopeConfig->getValue('general/locale/code');
-            $langISO = explode('_', $languageCode ?: 'en_US');
-            $langCode= reset($langISO);
-            $logoParams = [
-                'shop_code' => $this->getShopCode($method['pointspay_code']),
-                'language'=> $langCode ?: 'en'
-            ];
-            $paymentModeBool = $this->getPaymentMode($method['pointspay_code']);
-            // zero for Live, one for Sandbox
-            $paymentModeSelector = 'live';
-            if ($paymentModeBool == 1) {
-                $paymentModeSelector = 'sandbox';
-            }
-            $logoUrl =isset($method[$paymentModeSelector]['logo']) ? sprintf('%s', $method[$paymentModeSelector]['logo']) : 'https://secure.pointspay.com/checkout/user/btn-img-v2';
-            $method['logo'] = sprintf(
-                '%s?%s',
-                $logoUrl,
-                http_build_query($logoParams)
-            );
-            $payments[] = $method;
-        }
-        return $payments;
     }
 
     /**

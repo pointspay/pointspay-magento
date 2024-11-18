@@ -35,7 +35,7 @@ class PointspayCertificateDataBuilder implements BuilderInterface
         /** @var PaymentDataObject $paymentDataObject */
         $paymentDataObject = SubjectReader::readPayment($buildSubject);
         $order = $paymentDataObject->getOrder();
-        $paymentCode = $paymentDataObject->getPayment()->getMethod();
+        $paymentCode = $paymentDataObject->getPayment()->getAdditionalInformation('pointspay_flavor');
         $pointspayCertificate = $this->config->getPointspayCertificate($paymentCode, $order->getStoreId());
         $request['clientConfig']['key_info']['certificate'] = $pointspayCertificate;
         return $request;

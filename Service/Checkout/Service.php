@@ -150,7 +150,7 @@ class Service
         $item = $collection->getFirstItem();
         $paymentCode = null;
         if ($item->getId()) {
-            $paymentCode = $item->getPayment()->getMethod();
+            $paymentCode = $item->getPayment()->getAdditionalInformation('pointspay_flavor');
         }
         if ($customCancelUrl = $this->config->getCancelUrl($paymentCode)) {
             $params['order_id'] = $postData['order_id'];

@@ -58,7 +58,7 @@ class Uploader extends \Magento\MediaStorage\Model\File\Uploader
             return null;
         }
         $certificateContent = file_get_contents($this->_file['tmp_name']);
-        $this->configWriter->save(sprintf('payment/%s/certificate', $this->code), $certificateContent, $this->scope, $this->scopeId);
+        $this->configWriter->save($this->code, $certificateContent, $this->scope, $this->scopeId);
         return $certificateContent;
     }
 

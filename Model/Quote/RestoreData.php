@@ -119,6 +119,7 @@ class RestoreData
             $this->orderResource->load($orderModel, $orderId, 'increment_id');
             /** @var Order $orderModel */
             if (!empty($orderModel) && $orderModel->getId()) {
+                $this->getCheckoutSession()->clearHelperData();
                 $this->getCheckoutSession()
                     ->unsLastQuoteId()
                     ->unsLastSuccessQuoteId()

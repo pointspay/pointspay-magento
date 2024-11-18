@@ -53,7 +53,6 @@ class EnableDisable implements PaymentMethodsUpdaterInterface
      */
     public function execute()
     {
-        $this->paymentsReader->resetStorage();
         $connection = $this->resourceConnection->getConnection();
         $select = $connection->select();
         $select->from($connection->getTableName('core_config_data'));

@@ -10,13 +10,13 @@
 if (!isset($escaper)) {
     $escaper = $block;
 }
-$paymentInfo = $block->getInfo();
+
 ?>
 <span><?= $escaper->escapeHtml(__('The payment has been completed with the following method:')); ?></span>
 <br/>
-<?php if ($block->getInfo()->getMethod() === \Pointspay\Pointspay\Api\Data\PointspayGeneralPaymentInterface::POINTSPAY_REQUIRED_SETTINGS): ?>
-    <span><strong><?= $block->getSubPaymentTitle($block->getInfo()->getMethod()) ?></strong></span>
+<?php if ($block->getInfo()->getAdditionalInformation('pointspay_flavor') === 'pointspay'): ?>
+    <span><strong><?= $block->getPaymentTitleByFlavor($block->getInfo()->getAdditionalInformation('pointspay_flavor')) ?></strong></span>
 <?php else: ?>
-    <span><strong><?= $block->getSubPaymentTitle($block->getInfo()->getMethod()) ?></strong> by Pointspay</span>
+    <span><strong><?= $block->getPaymentTitleByFlavor($block->getInfo()->getAdditionalInformation('pointspay_flavor')) ?></strong> by Pointspay</span>
 <?php endif; ?>
 <?= $escaper->escapeHtml($block->getChildHtml()); ?>

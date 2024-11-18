@@ -130,6 +130,7 @@ class DownloadCertificate extends Field
                 'label' => __($this->getButtonName()),
             ]
         );
+        //$button->setData('disabled', 'disabled');
         $this->getElementScope() == 'default' && $button->setData('disabled', 'disabled');
 
         return $button->toHtml();

@@ -53,7 +53,6 @@ class Country implements PaymentMethodsUpdaterInterface
      */
     public function execute()
     {
-        $this->paymentsReader->resetStorage();
         $connection = $this->resourceConnection->getConnection();
         //  $connection->beginTransaction();
         $select = $connection->select();

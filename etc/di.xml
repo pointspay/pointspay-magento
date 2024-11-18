@@ -163,7 +163,6 @@
             </argument>
         </arguments>
     </virtualType>
-
     <virtualType name="PointspayPaymentRefundResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
     <arguments>
         <argument name="handlers" xsi:type="array">
@@ -172,40 +171,11 @@
         </argument>
     </arguments>
 </virtualType>
-<!--    File reader-->
-    <type name="Pointspay\Pointspay\Model\Config\Reader">
-        <arguments>
-            <argument name="fileName" xsi:type="string">pointspay_methods.xml</argument>
-            <argument name="fileResolver" xsi:type="object">Pointspay\Pointspay\Service\PaymentMethodsUpdater\FileResolver</argument>
-            <argument name="converter" xsi:type="object">Pointspay\Pointspay\Model\Config\Converter</argument>
-            <argument name="schemaLocator" xsi:type="object">Pointspay\Pointspay\Model\Config\SchemaLocator</argument>
-        </arguments>
-    </type>
-
-    <virtualType name="PointspayPaymentConfigDataStorage" type="Pointspay\Pointspay\Model\Framework\Config\Data">
-        <arguments>
-            <argument name="reader" xsi:type="object">Pointspay\Pointspay\Model\Config\Reader</argument>
-            <argument name="cacheId" xsi:type="string">pointspay_payment_config</argument>
-            <argument name="cacheTags" xsi:type="array">
-                <item name="config" xsi:type="string">config</item>
-                <item name="payment" xsi:type="string">payment</item>
-                <item name="pointspay_payment_config" xsi:type="string">pointspay_payment_config</item>
-            </argument>
-        </arguments>
-    </virtualType>
     <type name="Pointspay\Pointspay\Service\PaymentsReader">
         <arguments>
-            <argument name="dataStorage" xsi:type="object">PointspayPaymentConfigDataStorage</argument>
+            <argument name="scopeConfig" xsi:type="object">Magento\Framework\App\Config\ScopeConfigInterface</argument>
+            <argument name="serializer" xsi:type="object">Magento\Framework\Serialize\SerializerInterface</argument>
         </arguments>
-    </type>
-    <type name="Magento\Framework\App\Config\Initial\Converter">
-        <plugin name="pp_framework_app_config_initial_converter_plugin"
-                type="Pointspay\Pointspay\Model\Framework\App\Config\Initital\ConverterPlugin"
-                sortOrder="100"/>
-    </type>
-    <type name="Magento\Payment\Api\PaymentMethodListInterface">
-        <plugin name="pp_payment_method_list_plugin"
-                type="Pointspay\Pointspay\Model\Config\Payment\PaymentMethodListPlugin"/>
     </type>
     <type name="Pointspay\Pointspay\Service\Api\AbstractApi">
         <arguments>
@@ -220,21 +190,12 @@
         </arguments>
     </type>
     <preference for="Pointspay\Pointspay\Api\Data\ApiInterface" type="Pointspay\Pointspay\Service\Api\Environment\Live"/>
-<!--    Payment updater modificator-->
+    <!--    Payment updater modificator-->
     <type name="Pointspay\Pointspay\Service\PaymentMethodsUpdater\ExecutionChain">
         <arguments>
             <argument xsi:type="array" name="chain">
                 <item name="country" xsi:type="object">Pointspay\Pointspay\Service\PaymentMethodsUpdater\Country</item>
                 <item name="enable_disable_reinstated" xsi:type="object">Pointspay\Pointspay\Service\PaymentMethodsUpdater\EnableDisable</item>
-            </argument>
-        </arguments>
-    </type>
-<!--    Virtual Payment settings cloners-->
-    <type name="Pointspay\Pointspay\Model\Config\Structure\Data\DataChain">
-        <arguments>
-            <argument xsi:type="array" name="chain">
-                <item name="required_settings" xsi:type="object">Pointspay\Pointspay\Model\Config\Structure\Data\PointspayRequiredSettings</item>
-                <item name="access_settings" xsi:type="object">Pointspay\Pointspay\Model\Config\Structure\Data\PointspayAccessSettings</item>
             </argument>
         </arguments>
     </type>
@@ -273,34 +234,17 @@
         </arguments>
     </type>
     <!--    Assigning PaymentId service to the virtual checkout service-->
-
     <type name="Pointspay\Pointspay\Service\Checkout\Service">
         <arguments>
             <argument xsi:type="object" name="client">Pointspay\Pointspay\Service\Api\Checkout\PaymentId</argument>
             <argument xsi:type="object" name="logger">Pointspay\Pointspay\Service\Logger\Logger</argument>
         </arguments>
     </type>
-<!--   payment code modification in the payment methods object creator-->
-    <type name="Magento\Payment\Model\Method\InstanceFactory">
-        <plugin name="pp_payment_model_method"
-                type="Pointspay\Pointspay\Model\Payment\Model\Method\InstanceFactoryPlugin"
-                sortOrder="100"/>
-    </type>
 <!--    cloner a billing address virtual methods-->
-    <type name="Magento\Checkout\Block\Checkout\LayoutProcessor">
-        <plugin name="pp_checkout_block_checkout_layout_processor_cloner_plugin" type="Pointspay\Pointspay\Block\Checkout\LayoutProcessor\BillingAddressClonerProcessor"/>
-    </type>
-
     <preference for="Pointspay\Pointspay\Api\IpnInterface" type="Pointspay\Pointspay\Model\Ipn"/>
-
     <type name="Magento\Payment\Helper\Data">
         <plugin name="pp_model_payment_helper_data_plugin"
                 type="Pointspay\Pointspay\Model\Payment\Helper\DataPlugin"
-                sortOrder="100"/>
-    </type>
-    <type name="Magento\Payment\Model\Info">
-        <plugin name="pp_payment_model_info_plugin"
-                type="Pointspay\Pointspay\Model\Payment\Model\InfoPlugin"
                 sortOrder="100"/>
     </type>
 <!--    Logger implementation-->
@@ -351,16 +295,49 @@
             <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
         </arguments>
     </type>
-    <type name="Pointspay\Pointspay\Model\Config\Structure\Data">
-        <arguments>
-            <argument name="logger" xsi:type="object">Pointspay\Pointspay\Service\Logger\Logger</argument>
-        </arguments>
-    </type>
     <type name="Pointspay\Pointspay\Model\Ui\PointspayVirtualConfigProvider">
         <arguments>
             <argument name="logger" xsi:type="object">Pointspay\Pointspay\Service\Logger\Logger</argument>
         </arguments>
     </type>
+    <type name="Magento\Config\Model\Config\Structure">
+        <plugin name="pointspay_structure_plugin" type="Pointspay\Pointspay\Plugin\Config\StructurePlugin" />
+    </type>
     <preference for="Pointspay\Pointspay\Api\InvoiceMutexInterface"
                 type="Pointspay\Pointspay\Service\Api\Success\InvoiceMutex"/>
+    <preference for="Pointspay\Pointspay\Api\PaymentMethodsInterface" type="Pointspay\Pointspay\Service\Checkout\PaymentMethods"/>
+    <virtualType name="PointspayCustomerPaymentService" type="Pointspay\Pointspay\Service\Api\Checkout\BasePointspayPaymentMethodsService">
+        <arguments>
+            <argument name="cartProvider" xsi:type="object">Pointspay\Pointspay\Service\Api\CartProvider\CustomerCartProvider</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="PointspayGuestPaymentService" type="Pointspay\Pointspay\Service\Api\Checkout\BasePointspayPaymentMethodsService">
+        <arguments>
+            <argument name="cartProvider" xsi:type="object">Pointspay\Pointspay\Service\Api\CartProvider\GuestCartProvider</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="PointspayFormValidatorCustomerPaymentService" type="Pointspay\Pointspay\Service\Api\FormValidationPointspayPaymentMethodsService">
+        <arguments>
+            <argument name="paymentMethodsService" xsi:type="object">PointspayCustomerPaymentService</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="PointspayFormValidatorGuestPaymentService" type="Pointspay\Pointspay\Service\Api\FormValidationPointspayPaymentMethodsService">
+        <arguments>
+            <argument name="paymentMethodsService" xsi:type="object">PointspayGuestPaymentService</argument>
+        </arguments>
+    </virtualType>
+    <type name="Pointspay\Pointspay\Service\Api\GuestPointspayPaymentMethodsService">
+        <arguments>
+            <argument name="paymentMethodsService" xsi:type="object">PointspayFormValidatorGuestPaymentService</argument>
+        </arguments>
+    </type>
+    <type name="Pointspay\Pointspay\Service\Api\PointspayPaymentMethodsService">
+        <arguments>
+            <argument name="paymentMethodsService" xsi:type="object">PointspayFormValidatorCustomerPaymentService</argument>
+        </arguments>
+    </type>
+    <preference for="Pointspay\Pointspay\Api\Checkout\GuestPointspayPaymentMethodsInterface"
+                type="Pointspay\Pointspay\Service\Api\GuestPointspayPaymentMethodsService"/>
+    <preference for="Pointspay\Pointspay\Api\Checkout\PointspayPaymentMethodsInterface"
+                type="Pointspay\Pointspay\Service\Api\PointspayPaymentMethodsService"/>
 </config>

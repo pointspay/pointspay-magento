@@ -15,4 +15,23 @@
             <resource ref="self" />
         </resources>
     </route>
+
+    <route url="/V1/pointspay/guest-carts/:cartId/retrieve-pointspay_payment-methods" method="POST">
+        <service class="Pointspay\Pointspay\Api\Checkout\GuestPointspayPaymentMethodsInterface" method="getAvailablePaymentMethods"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/pointspay/carts/mine/retrieve-pointspay_payment-methods" method="POST">
+        <service class="Pointspay\Pointspay\Api\Checkout\PointspayPaymentMethodsInterface" method="getAvailablePaymentMethods"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+        <data>
+            <parameter name="cartId" force="true">%cart_id%</parameter>
+        </data>
+    </route>
+
+
 </routes>

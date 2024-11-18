@@ -44,23 +44,9 @@ class PointspayVirtualConfigProvider implements ConfigProviderInterface
      */
     public function getConfig()
     {
-        $flavours = $this->config->getEnabledPaymentMethodsDetails();
-        $this->logger->addInfo('Enabled payment methods', $flavours);
-        $flavoursData = [];
-        foreach ($flavours as $key => $flavour) {
-            //because $this->config->getEnabledPaymentMethodsDetails() returns array of only enabled payment methods data
-            $flavoursData[$flavour['code']]['isActive'] = true;
-            $flavoursData[$flavour['code']]['logo'] = $flavour['logo'];
-        }
-
         $payment = [
-            'pointspay_available_methods_details' => $this->config->getEnabledPaymentMethodsDetails(),
             'pointspay_main_payment_method_code'=> self::CODE
         ];
-
-        foreach ($flavoursData as $key => $value) {
-            $payment[$key] = $value;
-        }
 
         return ['payment' => $payment];
     }

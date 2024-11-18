@@ -2,36 +2,39 @@
 
 namespace Pointspay\Pointspay\Service;
 
-use Magento\Framework\Config\DataInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Serialize\SerializerInterface;
 
 class PaymentsReader
 {
-    /**
-     * @var \Magento\Framework\Config\DataInterface
-     */
-    private $dataStorage;
+    private ScopeConfigInterface $scopeConfig;
+    private SerializerInterface $serializer;
 
     /**
-     * @param \Magento\Framework\Config\DataInterface $dataStorage
+     * @param ScopeConfigInterface $scopeConfig
+     * @param SerializerInterface $serializer
      */
-    public function __construct(DataInterface $dataStorage)
-    {
-        $this->dataStorage = $dataStorage;
+    public function __construct(
+        ScopeConfigInterface $scopeConfig,
+        SerializerInterface $serializer
+    ) {
+        $this->scopeConfig = $scopeConfig;
+        $this->serializer = $serializer;
     }
 
     /**
-     * @return mixed
+     * @return array
      */
     public function getAvailablePointspayMethods()
     {
-        return $this->dataStorage->get('pointspay_methods', []);
-    }
+        $availableMethodsList =  $this->scopeConfig->getValue('payment/pointspay_available_methods_list');
+        $availableMethodsListDecoded = $this->serializer->unserialize($availableMethodsList ?? []);
 
-    /**
-     * @return void
-     */
-    public function resetStorage()
-    {
-        $this->dataStorage->reset();
+        $availableMethods = [];
+        foreach ($availableMethodsListDecoded as $method) {
+            $availableMethods[$method['code']] = array_merge($method, ['pointspay_code' => $method['code']]);
+        }
+
+        return $availableMethods;
     }
 }

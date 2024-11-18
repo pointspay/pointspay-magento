@@ -97,32 +97,36 @@ class Country extends DataObject implements OptionSourceInterface, ArrayInterfac
     {
         $options = [];
         if (!$this->getPath()) {
-            //process like regular source model
+            // Process as a regular source model
             $options = $this->processLikeRegularSourceModel($foregroundCountries);
         } else {
-            //or process like custom source model with unsetting options(inapplicable countries by API)
+            // Process as a custom source model with unsetting options (inapplicable countries by API)
             $intermediateScopeString = explode('_required_settings/specificcountry', $this->getPath());
             $explodedBySlash = explode('/', reset($intermediateScopeString));
             $virtualMethodCode = end($explodedBySlash);
+
+            // Only proceed if options for this virtual method code are not cached
             if (!isset($this->optionsByPointspay[$virtualMethodCode])) {
                 $availableMethods = $this->configHelper->getPaymentsReader()->getAvailablePointspayMethods();
-                if (!in_array($virtualMethodCode, array_keys($availableMethods))) {
-                    $options = $this->processLikeRegularSourceModel($foregroundCountries);
-                } else {
-                    if (!isset($availableMethods[$virtualMethodCode]['applicableCountries'])) {
-                        $options = $this->processLikeRegularSourceModel($foregroundCountries);
-                    } else {
+
+                // Check if $availableMethods is an array and contains the $virtualMethodCode
+                if (is_array($availableMethods) && in_array($virtualMethodCode, array_keys($availableMethods))) {
+                    if (isset($availableMethods[$virtualMethodCode]['applicableCountries'])) {
                         $applicableCountries = $availableMethods[$virtualMethodCode]['applicableCountries'];
                         $processedOptions = $this->processLikePointspaySourceModel($foregroundCountries, $applicableCountries);
                         $this->optionsByPointspay[$virtualMethodCode] = $processedOptions;
                         $options = $this->optionsByPointspay[$virtualMethodCode];
+                    } else {
+                        // Fallback to processing like a regular source model
+                        $options = $this->processLikeRegularSourceModel($foregroundCountries);
                     }
-
+                } else {
+                    // Fallback to processing like a regular source model if $availableMethods is invalid
+                    $options = $this->processLikeRegularSourceModel($foregroundCountries);
                 }
             } else {
                 $options = $this->optionsByPointspay[$virtualMethodCode];
             }
-
         }
 
         if (!$isMultiselect) {

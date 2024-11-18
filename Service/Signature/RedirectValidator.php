@@ -111,7 +111,7 @@ class RedirectValidator
         try {
             $order = $this->ipnModel->getOrder($bodyInfo);
             $storeId = $order->getStoreId();
-            $paymentCode = $order->getPayment()->getMethod();
+            $paymentCode = $order->getPayment()->getAdditionalInformation('pointspay_flavor');
             return $this->getPaymentConfigCertInfo($paymentCode, $storeId);
         } catch (\Exception $e) {
             return '';
