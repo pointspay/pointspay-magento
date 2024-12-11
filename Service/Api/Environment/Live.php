@@ -34,7 +34,11 @@ class Live implements \Pointspay\Pointspay\Api\Data\ApiInterface
         $paymentMethodsEndpoint = sprintf('%sapi/v1/payment-methods', $url);
         $promise = $this->api->execute($paymentMethodsEndpoint);
         $methods = $promise->get()->getBody();
-        return $this->serializer->unserialize($methods);
+        try {
+            return $this->serializer->unserialize($methods);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
 }

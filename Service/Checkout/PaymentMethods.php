@@ -46,7 +46,7 @@ class PaymentMethods implements PaymentMethodsInterface
     public function getPaymentTitleByCode($flavorCode)
     {
         $jsonData = $this->scopeConfig->getValue('payment/pointspay_available_methods_list');
-        $availableMethods = $this->serializer->unserialize($jsonData ?? []);
+        $availableMethods = $this->serializer->unserialize($jsonData ?? '[]');
 
         foreach ($availableMethods as $method) {
             if ($method['code'] === $flavorCode) {

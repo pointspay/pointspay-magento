@@ -108,6 +108,12 @@ class PaymentMethodsUpdater
     {
 
         $contentFromApi = $this->api->getPaymentMethods();
+
+        if($contentFromApi === null) {
+            $this->logger->warning('Error getting payment methods data from API');
+            return;
+        }
+
         $this->logger->addInfo('Content from API', $contentFromApi);
         $filteredContentFromApi = $this->filterContent($contentFromApi);
         $this->logger->addInfo('Filtered content from API', $filteredContentFromApi);

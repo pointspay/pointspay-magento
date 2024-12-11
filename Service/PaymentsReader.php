@@ -28,7 +28,7 @@ class PaymentsReader
     public function getAvailablePointspayMethods()
     {
         $availableMethodsList =  $this->scopeConfig->getValue('payment/pointspay_available_methods_list');
-        $availableMethodsListDecoded = $this->serializer->unserialize($availableMethodsList ?? []);
+        $availableMethodsListDecoded = $this->serializer->unserialize($availableMethodsList ?? '[]');
 
         $availableMethods = [];
         foreach ($availableMethodsListDecoded as $method) {
