@@ -76,7 +76,7 @@ class BasePointspayPaymentMethodsService
     {
         $quote = $this->cartProvider->getQuote($cartId);
         $jsonData = $this->scopeConfig->getValue('payment/pointspay_available_methods_list');
-        $availableMethods = $this->serializer->unserialize($jsonData ?? []);
+        $availableMethods = $this->serializer->unserialize($jsonData ?? '[]');
 
         $payments = [];
         foreach ($availableMethods as $method) {
