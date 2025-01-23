@@ -1,6 +1,6 @@
 {
     "name": "pointspay/pointspay-magento",
-    "version": "3.3.1",
+    "version": "3.3.2",
     "description": "Pointspay payment",
     "type": "magento2-module",
     "require": {
