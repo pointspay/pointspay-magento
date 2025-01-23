@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="img-src">
+            <values>
+                <value id="uat-pointspay-images" type="host">uat-secure.pointspay.com</value>
+                <value id="pointspay-images" type="host">secure.pointspay.com</value>
+            </values>
+        </policy>
+        <policy id="script-src">
+            <values>
+                <value id="uat-pointspay-scripts" type="host">uat-secure.pointspay.com</value>
+                <value id="pointspay-scripts" type="host">secure.pointspay.com</value>
+            </values>
+        </policy>
+        <policy id="connect-src">
+            <values>
+                <value id="uat-pointspay-connect" type="host">uat-secure.pointspay.com</value>
+                <value id="pointspay-connect" type="host">secure.pointspay.com</value>
+            </values>
+        </policy>
+        <policy id="frame-src">
+            <values>
+                <value id="uat-pointspay-frames" type="host">uat-secure.pointspay.com</value>
+                <value id="pointspay-frames" type="host">secure.pointspay.com</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>
