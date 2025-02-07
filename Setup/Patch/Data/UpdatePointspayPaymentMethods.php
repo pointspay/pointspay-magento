@@ -16,7 +16,7 @@ class UpdatePointspayPaymentMethods implements DataPatchInterface
     /**
      * @var PaymentMethodsUpdater
      */
-    private PaymentMethodsUpdater $paymentMethodsUpdater;
+    private $paymentMethodsUpdater;
 
     /**
      * @param ModuleDataSetupInterface $moduleDataSetup
