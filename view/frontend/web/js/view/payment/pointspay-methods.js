@@ -2,7 +2,6 @@ define(
     [
         'uiComponent',
         'Magento_Checkout/js/model/payment/renderer-list',
-        'Magento_Checkout/js/model/full-screen-loader',
         'Magento_SalesRule/js/action/set-coupon-code',
         'Magento_SalesRule/js/action/cancel-coupon',
         'Pointspay_Pointspay/js/model/pointspay-service'
@@ -10,7 +9,6 @@ define(
     function (
         Component,
         rendererList,
-        fullScreenLoader,
         setCouponCodeAction,
         cancelCouponAction,
         pointspayService
@@ -28,14 +26,14 @@ define(
                 this._super();
 
                 var retrievePaymentMethods = function (){
-                    fullScreenLoader.startLoader();
+                    pointspayService.startLoader();
 
                     pointspayService.retrievePaymentMethods().done(function(paymentMethods) {
                         pointspayService.setPaymentMethods(paymentMethods);
-                        fullScreenLoader.stopLoader();
+                        pointspayService.stopLoader();
                     }).fail(function() {
                         console.log('Fetching the payment methods failed!');
-                        fullScreenLoader.stopLoader();
+                        pointspayService.stopLoader();
                     });
                 };
                 retrievePaymentMethods();

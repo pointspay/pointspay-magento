@@ -8,7 +8,6 @@ define([
     'Magento_Checkout/js/model/error-processor',
     'Magento_Checkout/js/model/quote',
     'Magento_Checkout/js/checkout-data',
-    'Magento_Checkout/js/model/full-screen-loader',
     'Pointspay_Pointspay/js/model/pointspay-service',
     'Magento_Checkout/js/model/payment/additional-validators',
     'Pointspay_Pointspay/js/model/pointspay-token'
@@ -22,7 +21,6 @@ define([
     errorProcessor,
     quote,
     checkoutData,
-    fullScreenLoader,
     pointspayService,
     additionalValidators,
     pointspayToken
@@ -50,7 +48,7 @@ define([
             var self = this;
             this._super();
 
-            fullScreenLoader.startLoader();
+            pointspayService.startLoader();
 
             var paymentMethodsObserver = pointspayService.getPaymentMethods();
 
@@ -68,16 +66,16 @@ define([
 
                 canReloadPayments(false);
 
-                fullScreenLoader.startLoader();
+                pointspayService.startLoader();
 
                 pointspayService.retrievePaymentMethods().done(function (paymentMethods) {
                     pointspayService.setPaymentMethods(paymentMethods);
-                    fullScreenLoader.stopLoader();
+                    pointspayService.stopLoader();
 
                 }).fail(function () {
                     console.log('Fetching the payment methods failed!');
                 }).always(function () {
-                    fullScreenLoader.stopLoader();
+                    pointspayService.stopLoader();
                     canReloadPayments(true);
                 });
             }, this);
@@ -89,7 +87,7 @@ define([
             self.pointspayPaymentMethods(paymentMethodsResponse);
             pointspayPaymentMethods(paymentMethodsResponse);
 
-            fullScreenLoader.stopLoader();
+            pointspayService.stopLoader();
         },
 
         getCode: function () {

@@ -6,6 +6,7 @@ define([
     'Magento_Checkout/js/model/quote',
     'Magento_Customer/js/model/customer',
     'Magento_Checkout/js/model/url-builder',
+    'Magento_Checkout/js/model/full-screen-loader',
     'mage/cookies'
 ], function (
     ko,
@@ -15,11 +16,26 @@ define([
     quote,
     customer,
     urlBuilder,
+    fullScreenLoader,
 ) {
     'use strict';
 
+    let loaderCounter = 0;
+
     return {
         paymentMethods: ko.observable({}),
+
+        startLoader: function () {
+            loaderCounter++;
+            fullScreenLoader.startLoader();
+        },
+
+        stopLoader: function () {
+            if (loaderCounter > 0) {
+                loaderCounter--;
+                fullScreenLoader.stopLoader();
+            }
+        },
 
         /**
          * Retrieve the list of available payment methods from Pointspay
