@@ -19,12 +19,12 @@ class StructurePlugin
     /**
      * @var \Magento\Config\Model\Config\Structure\Element\FlyweightFactory
      */
-    private FlyweightFactory $_flyweightFactory;
+    private $_flyweightFactory;
 
     /**
      * @var \Magento\Config\Model\Config\ScopeDefiner
      */
-    private ScopeDefiner $_scopeDefiner;
+    private $_scopeDefiner;
 
     /**
      * StructurePlugin constructor.

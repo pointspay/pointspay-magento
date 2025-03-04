@@ -7,8 +7,15 @@ use Magento\Framework\Serialize\SerializerInterface;
 
 class PaymentsReader
 {
-    private ScopeConfigInterface $scopeConfig;
-    private SerializerInterface $serializer;
+    /**
+     * @var ScopeConfigInterface
+     */
+    private $scopeConfig;
+
+    /**
+     * @var SerializerInterface
+     */
+    private $serializer;
 
     /**
      * @param ScopeConfigInterface $scopeConfig
