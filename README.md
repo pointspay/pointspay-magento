@@ -1,31 +1,30 @@
-The README.md file content is generated automatically, see [Magento module README.md](https://github.com/magento/devdocs/wiki/Magento-module-README.md) for more information.
+# Pointspay Magento 2 Plugin Installation Guide
 
-# Pointspay_Pointspay module
+[Poinstpay Magento Plugin On Packagist](https://packagist.org/packages/pointspay/pointspay-magento)
 
-Pointspay payment
+## 1. Introduction
 
-## Installation details
+Pointspay is an Alternative Payment Method (APM) that lets shoppers pay with their favourite loyalty program miles or points at participating web shops. The Pointspay plugin for Magento 2 enables merchants who are on Magento 2 to easily install Pointspay as an additional payment method at their checkout and process payments and refunds seamlessly. With a single installation of the Pointspay plugin, merchants have the ability to enable one or more of the available Pointspay payment method variants, like Pointspay & Flying Blue+.
 
-For information about a module installation in Magento 2, see [Enable or disable modules](https://devdocs.magento.com/guides/v2.4/install-gde/install/cli/install-cli-subcommands-enable.html).
+## 2. Supported Magento Versions
 
-## Extensibility
+The Pointspay Magento plugin is compatible with 2.2.x, 2.3.x & 2.4.x Magento versions. The plugin has been certified for versions up to 2.4.6.
 
-Extension developers can interact with the Pointspay_Pointspay module. For more information about the Magento extension mechanism, see [Magento plug-ins](https://devdocs.magento.com/guides/v2.4/extension-dev-guide/plugins.html).
+## 3. Installation Details
 
-[The Magento dependency injection mechanism](https://devdocs.magento.com/guides/v2.4/extension-dev-guide/depend-inj.html) enables you to override the functionality of the Pointspay_Pointspay module.
+Execute the following command for installing versions 2.4.x or 2.3.x of the Pointspay plugin via Composer:
+  ```bash
+  composer require pointspay/pointspay-magento
+```
+Execute the following command for installing version 2.2.x version of the plugin via Composer:
+```
+composer require pointspay/pointspay-magento-2.2
+```
 
-### Layouts
+## 4. Plugin Configurations
+Navigate to Pointspay payment method via Magento Admin -> Stores -> Settings -> Configuration -> Sales -> Payment Methods -> Pointspay to configure the plugin.
 
-The module introduces layout handles in the `view/adminhtml/layout` directory.
+Note: Refer to Image 1 below that shows the “Payment Methods” screen after Pointspay plugin installation.
 
-For more information about a layout in Magento 2, see the [Layout documentation](https://devdocs.magento.com/guides/v2.4/frontend-dev-guide/layouts/layout-overview.html).
 
-### UI components
-
-You can extend product and category updates using the UI components located in the `view/adminhtml/ui_component` directory.
-
-For information about a UI component in Magento 2, see [Overview of UI components](https://devdocs.magento.com/guides/v2.4/ui_comp_guide/bk-ui_comps.html).
-
-## Additional information
-
-For information about significant changes in patch releases, see [Release information](https://devdocs.magento.com/guides/v2.4/release-notes/bk-release-notes.html).
+Feel free to copy this markdown content and use it in your GitHub repository! If you need any further assistance, let me know.
