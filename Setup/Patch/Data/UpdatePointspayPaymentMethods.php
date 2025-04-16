@@ -69,7 +69,10 @@ class UpdatePointspayPaymentMethods implements DataPatchInterface
             ['payment_method LIKE ?' => '%_required_settings%']
         );
 
-        $this->paymentMethodsUpdater->execute();
+        try {
+            $this->paymentMethodsUpdater->execute();
+        } catch (\Exception $e) {
+        }
 
         $this->moduleDataSetup->getConnection()->endSetup();
     }
