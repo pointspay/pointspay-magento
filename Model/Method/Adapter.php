@@ -83,12 +83,12 @@ class Adapter extends \Magento\Payment\Model\Method\Adapter
         $code,
         $formBlockType,
         $infoBlockType,
-        CommandPoolInterface $commandPool = null,
-        ValidatorPoolInterface $validatorPool = null,
-        CommandManagerInterface $commandExecutor = null,
-        LoggerInterface $logger = null,
-        Config $configHelper = null,
-        ConfigFactory $configFactory = null
+        ?CommandPoolInterface $commandPool = null,
+        ?ValidatorPoolInterface $validatorPool = null,
+        ?CommandManagerInterface $commandExecutor = null,
+        ?LoggerInterface $logger = null,
+        ?Config $configHelper = null,
+        ?ConfigFactory $configFactory = null
     ) {
         parent::__construct($eventManager, $valueHandlerPool, $paymentDataObjectFactory, $code, $formBlockType, $infoBlockType, $commandPool, $validatorPool, $commandExecutor, $logger);
         $this->valueHandlerPool = $valueHandlerPool;
@@ -138,7 +138,7 @@ class Adapter extends \Magento\Payment\Model\Method\Adapter
     /**
      * @inheritdoc
      */
-    public function isAvailable(CartInterface $quote = null)
+    public function isAvailable(?CartInterface $quote = null)
     {
         return true;
     }

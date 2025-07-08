@@ -46,8 +46,8 @@ class AllowedCountries extends Value
         WriterInterface                                  $configWriter,
         PaymentsReader                                   $paymentsReader,
         \Magento\Framework\Serialize\SerializerInterface $serializer,
-        AbstractResource                                 $resource = null,
-        AbstractDb                                       $resourceCollection = null,
+        ?AbstractResource                                 $resource = null,
+        ?AbstractDb                                       $resourceCollection = null,
         array                                            $data = []
     )
     {
