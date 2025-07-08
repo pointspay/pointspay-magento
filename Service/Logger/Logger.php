@@ -128,7 +128,7 @@ class Logger extends MonologLogger
             $level = class_exists(\Monolog\Level::class) ? static::INFO : static::RESULT;
 
             if ($level === static::INFO) {
-                $context['infoType'] = static::REQUEST;
+                $context['infoType'] = static::RESULT;
             }
 
             return $this->addRecord($level, $message, $context);
@@ -151,7 +151,7 @@ class Logger extends MonologLogger
             $level = class_exists(\Monolog\Level::class) ? static::INFO : static::REQUEST;
 
             if ($level === static::INFO) {
-                $context['infoType'] = self::REQUEST;
+                $context['infoType'] = static::REQUEST;
             }
 
             return $this->addRecord($level, $message, $context);
