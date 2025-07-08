@@ -4,7 +4,6 @@ namespace Pointspay\Pointspay\Service\Logger\Handler;
 
 use Pointspay\Pointspay\Service\Logger\Logger;
 
-
 class Debug extends Base
 {
     /**
@@ -16,6 +15,4 @@ class Debug extends Base
      * @var int
      */
     protected $loggerType = Logger::DEBUG;
-
-    protected $level = Logger::DEBUG;
 }

@@ -14,9 +14,4 @@ class Critical extends Base
      * @var int
      */
     protected $loggerType = Logger::CRITICAL;
-
-    /**
-     * @var
-     */
-    protected $level = Logger::CRITICAL;
 }

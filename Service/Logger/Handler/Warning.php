@@ -14,6 +14,4 @@ class Warning extends Base
      * @var int
      */
     protected $loggerType = Logger::WARNING;
-
-    protected $level = Logger::WARNING;
 }

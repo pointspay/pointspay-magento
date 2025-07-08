@@ -13,7 +13,10 @@ class Request extends Base
     /**
      * @var int
      */
-    protected $loggerType = Logger::REQUEST;
+    protected $loggerType = Logger::INFO;
 
-    protected $level = Logger::REQUEST;
+    /**
+     * @var int|null
+     */
+    protected $infoType = Logger::REQUEST;
 }
