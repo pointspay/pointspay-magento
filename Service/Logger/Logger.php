@@ -127,6 +127,10 @@ class Logger extends MonologLogger
             // Monolog\Level exists only in Magento 2.4.8+ versions
             $level = class_exists(\Monolog\Level::class) ? static::INFO : static::RESULT;
 
+            if ($level === static::INFO) {
+                $context['infoType'] = static::REQUEST;
+            }
+
             return $this->addRecord($level, $message, $context);
         }
         return false;
@@ -145,6 +149,10 @@ class Logger extends MonologLogger
         if ($this->config->getDebugMode($code, $storeId)) {
             // Monolog\Level exists only in Magento 2.4.8+ versions
             $level = class_exists(\Monolog\Level::class) ? static::INFO : static::REQUEST;
+
+            if ($level === static::INFO) {
+                $context['infoType'] = self::REQUEST;
+            }
 
             return $this->addRecord($level, $message, $context);
         }
@@ -166,6 +174,8 @@ class Logger extends MonologLogger
     {
         $storeId = $this->storeManager->getStore()->getId();
         if ($this->config->getDebugMode($code, $storeId)) {
+            $context['infoType'] = static::INFO;
+
             return $this->addRecord(static::INFO, $message, $context);
         }
     }
