@@ -178,6 +178,7 @@ class Logger extends MonologLogger
 
             return $this->addRecord(static::INFO, $message, $context);
         }
-    }
 
+        return false;
+    }
 }
