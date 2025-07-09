@@ -29,7 +29,7 @@ class CountryValidator extends AbstractValidator
         ResultInterfaceFactory $resultFactory,
         Country $countrySource,
         WriterInterface $configWriter,
-        ConfigInterface $config = null
+        ?ConfigInterface $config = null
     ) {
         parent::__construct($resultFactory);
         $this->config = $config;

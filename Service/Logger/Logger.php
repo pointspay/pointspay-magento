@@ -16,7 +16,7 @@ class Logger extends MonologLogger
 
     /**
      * Logging levels from syslog protocol defined in RFC 5424
-     * Overrule the default to add PP specific loggers to log into seperate files
+     * Overrule the default to add PP specific loggers to log into separate files
      *
      * @var array $levels Logging levels
      */
@@ -124,7 +124,14 @@ class Logger extends MonologLogger
     {
         $storeId = $this->storeManager->getStore()->getId();
         if ($this->config->getDebugMode($code, $storeId)) {
-            return $this->addRecord(static::RESULT, $message, $context);
+            // Monolog\Level exists only in Magento 2.4.8+ versions
+            $level = class_exists(\Monolog\Level::class) ? static::INFO : static::RESULT;
+
+            if ($level === static::INFO) {
+                $context['infoType'] = static::RESULT;
+            }
+
+            return $this->addRecord($level, $message, $context);
         }
         return false;
     }
@@ -140,7 +147,14 @@ class Logger extends MonologLogger
     {
         $storeId = $this->storeManager->getStore()->getId();
         if ($this->config->getDebugMode($code, $storeId)) {
-            return $this->addRecord(static::REQUEST, $message, $context);
+            // Monolog\Level exists only in Magento 2.4.8+ versions
+            $level = class_exists(\Monolog\Level::class) ? static::INFO : static::REQUEST;
+
+            if ($level === static::INFO) {
+                $context['infoType'] = static::REQUEST;
+            }
+
+            return $this->addRecord($level, $message, $context);
         }
         return false;
     }
@@ -160,8 +174,11 @@ class Logger extends MonologLogger
     {
         $storeId = $this->storeManager->getStore()->getId();
         if ($this->config->getDebugMode($code, $storeId)) {
+            $context['infoType'] = static::INFO;
+
             return $this->addRecord(static::INFO, $message, $context);
         }
-    }
 
+        return false;
+    }
 }

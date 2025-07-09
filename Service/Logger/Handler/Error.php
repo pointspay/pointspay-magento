@@ -14,9 +14,4 @@ class Error extends Base
      * @var int
      */
     protected $loggerType = Logger::ERROR;
-
-    /**
-     * @var
-     */
-    protected $level = Logger::ERROR;
 }

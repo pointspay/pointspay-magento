@@ -16,7 +16,7 @@ class ConfigValueHandler extends \Magento\Payment\Gateway\Config\ConfigValueHand
      * @param \Magento\Payment\Gateway\ConfigInterface $configInterface
      */
     public function __construct(
-        ConfigInterface $configInterface = null
+        ?ConfigInterface $configInterface = null
     ) {
         $this->configInterface = $configInterface;
         parent::__construct($configInterface);

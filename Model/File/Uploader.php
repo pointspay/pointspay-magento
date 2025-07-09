@@ -38,7 +38,7 @@ class Uploader extends \Magento\MediaStorage\Model\File\Uploader
         Storage $coreFileStorage,
         NotProtectedExtension $validator,
         WriterInterface $configWriter,
-        Filesystem $filesystem = null
+        ?Filesystem $filesystem = null
     ) {
         parent::__construct($fileId, $coreFileStorageDb, $coreFileStorage, $validator);
         $this->configWriter = $configWriter;

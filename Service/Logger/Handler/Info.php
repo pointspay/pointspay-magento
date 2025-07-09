@@ -16,5 +16,8 @@ class Info extends Base
      */
     protected $loggerType = Logger::INFO;
 
-    protected $level = Logger::INFO;
+    /**
+     * @var int|null
+     */
+    protected $infoType = Logger::INFO;
 }

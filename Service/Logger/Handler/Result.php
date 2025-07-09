@@ -13,7 +13,10 @@ class Result extends Base
     /**
      * @var int
      */
-    protected $loggerType = Logger::RESULT;
+    protected $loggerType = Logger::INFO;
 
-    protected $level = Logger::RESULT;
+    /**
+     * @var int|null
+     */
+    protected $infoType = Logger::RESULT;
 }
