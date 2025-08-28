@@ -106,7 +106,6 @@ class PaymentMethodsUpdater
      */
     public function execute()
     {
-
         $contentFromApi = $this->api->getPaymentMethods();
 
         if($contentFromApi === null) {
