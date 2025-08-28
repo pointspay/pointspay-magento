@@ -31,7 +31,7 @@ class Live implements \Pointspay\Pointspay\Api\Data\ApiInterface
 //      if you want environment specific url that depends on the environment use the following code
 //      $paymentMethodsEndpoint = sprintf('%sapi/v1/payment-methods', $this->api->getApiEndpoint());
         $url = PointspayGeneralPaymentInterface::POINTSPAY_LIVE_URL;
-        $paymentMethodsEndpoint = sprintf('%sapi/v1/payment-methods', $url);
+        $paymentMethodsEndpoint = sprintf('%scheckout/api/v1/payment-methods', $url);
         $promise = $this->api->execute($paymentMethodsEndpoint);
         $methods = $promise->get()->getBody();
         try {
