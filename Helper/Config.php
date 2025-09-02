@@ -228,14 +228,6 @@ class Config
     }
 
     /**
-     * @return mixed
-     */
-    public function getApiKey()
-    {
-        return $this->scopeConfig->getValue('payment/pointspay_group_all_in_one/api_key');
-    }
-
-    /**
      * Get Pointspay magento module's version from composer.json
      *
      * @return string

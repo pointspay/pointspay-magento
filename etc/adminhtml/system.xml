@@ -15,13 +15,6 @@
                     <label>Extension version</label>
                     <frontend_model>Pointspay\Pointspay\Block\Adminhtml\System\Config\Field\Version</frontend_model>
                 </field>
-                <field id="api_key" translate="label" type="password" sortOrder="20" showInDefault="1" showInWebsite="1"
-                       showInStore="0">
-                    <label>API key</label>
-                    <frontend_class>required</frontend_class>
-                    <validate>required-entry validate-length minimum-length-36 maximum-length-36 validate-no-empty</validate>
-                    <comment model="Pointspay\Pointspay\Model\Comment\ApiKeyEnding"/>
-                </field>
                 <field id="request_timeout" translate="label" type="text" sortOrder="20" showInDefault="0" showInWebsite="0"
                        showInStore="0">
                     <label>Request Timeout</label>

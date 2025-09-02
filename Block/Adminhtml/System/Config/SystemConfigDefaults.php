@@ -33,7 +33,6 @@ class SystemConfigDefaults
         'group' => 'pointspay',
         'demo_mode' => 0,
         'request_timeout' => 30,
-        'api_key' => 'No ApiKey',
     ];
 
     /**
