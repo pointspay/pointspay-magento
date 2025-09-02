@@ -18,9 +18,7 @@ class GetMethods extends \Pointspay\Pointspay\Service\Api\AbstractApi
     {
         $result = null;
         $body = !empty($arrayForApi) ? $this->serializer->serialize($arrayForApi) : null;
-        $headersForApi = !empty($headersForApi) ? $headersForApi : [
-            'X-Api-Key' => $this->generalHelper->getApiKey(),
-        ];
+        $headersForApi = !empty($headersForApi) ? $headersForApi : [];
         $apiEndpointForRequest = $apiEndpoint?:$this->getApiEndpoint();
         try {
             $result = $this->asyncClient->request(
