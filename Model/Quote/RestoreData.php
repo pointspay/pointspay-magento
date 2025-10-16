@@ -119,13 +119,6 @@ class RestoreData
             $this->orderResource->load($orderModel, $orderId, 'increment_id');
             /** @var Order $orderModel */
             if (!empty($orderModel) && $orderModel->getId()) {
-                $this->getCheckoutSession()->clearHelperData();
-                $this->getCheckoutSession()
-                    ->unsLastQuoteId()
-                    ->unsLastSuccessQuoteId()
-                    ->unsLastOrderId()
-                    ->unsLastRealOrderId();
-
                 $this->getCheckoutSession()->setLastRealOrderId($orderId);
                 $this->restoreCart($orderModel);
                 $result = true;
@@ -154,8 +147,8 @@ class RestoreData
      * Restores the cart
      *
      * @param Order $order
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     *
+     * @return bool
      */
     public function restoreCart(Order $order)
     {
@@ -165,37 +158,99 @@ class RestoreData
             return false;
         }
 
+        return $this->cancelOrderAndRestoreQuote($order);
+    }
+
+    /**
+     * Restores the customer if he/she is logged-in
+     *
+     * @param Order $order
+     *
+     * @return bool
+     */
+    public function restoreCustomer(Order $order)
+    {
+        if (!$order->getCustomerId()) {
+            return true;
+        }
+
+        try {
+            $this->_customerSession->setCustomerId($order->getCustomerId());
+            $this->_customerSession->setCustomerGroupId($order->getCustomerGroupId());
+            $this->logger->addInfo(__METHOD__ . " Customer session restored for customer ID: {$order->getCustomerId()}");
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->addError(__METHOD__ . " Failed to restore customer session: " . $e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param Order $order
+     * @return bool
+     */
+    private function cancelOrderAndRestoreQuote(Order $order)
+    {
         $orderId = $this->_checkoutSession->getLastRealOrderId();
+
+        if ($order->getRealOrderId() != $orderId && !$order->getId()) {
+            $this->logger->addError(__METHOD__ . " Unexpected point where no order to restore or to cancel.");
+
+            return false;
+        }
+
+
         if ($order->getRealOrderId() == $orderId) {
             $this->logger->addInfo(
                 __METHOD__ . " order id matches. LastReadOrderId:{$orderId} " .
                 "OrderToCancel:{$order->getRealOrderId()}"
             );
-            // restore the quote
-            if ($this->_checkoutSession->restoreQuote()) {
-                $this->logger->addInfo(__METHOD__ . " Quote has been restored.");
-            } else {
-                $this->logger->addError(__METHOD__ . " Failed to restore the quote.");
-            }
-            $order->setActionFlag(Order::ACTION_FLAG_CANCEL, true);
-            $order = $order->registerCancellation(__('Payment cancelled.'));
-            $this->orderResource->save($order);
-            $order = $order->cancel();
-            $this->orderResource->save($order);
+
+            $this->restoreQuote($order);
+            $this->updateCancelledOrder($order);
+
             return true;
-        } elseif ($order->getId()) {
-            $this->logger->addWarning(__METHOD__ . " attempting to cancel the order which is not the last one. " .
-                "LastRealOrderId:{$this->_checkoutSession->getLastRealOrderId()} " .
-                "OrderToCancel:{$order->getRealOrderId()}. Silently cancelling.");
-            $order->setActionFlag(Order::ACTION_FLAG_CANCEL, true);
-            $order = $order->registerCancellation(__('Payment cancelled.'));
-            $this->orderResource->save($order);
-            $order = $order->cancel();
-            $this->orderResource->save($order);
-            return true;
-        } else {
-            $this->logger->addError(__METHOD__ . " Unexpected point where no order to restore or to cancel.");
-            return false;
         }
+
+        $this->logger->addWarning(__METHOD__ . " attempting to cancel the order which is not the last one. " .
+            "LastRealOrderId:{$this->_checkoutSession->getLastRealOrderId()} " .
+            "OrderToCancel:{$order->getRealOrderId()}. Silently cancelling.");
+        $this->updateCancelledOrder($order);
+
+        return true;
+    }
+
+    /**
+     * @param Order $order
+     *
+     * @throws LocalizedException
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     */
+    private function updateCancelledOrder(Order $order)
+    {
+        $order = $order->registerCancellation(__('Payment cancelled.'));
+        $this->orderResource->save($order);
+        $order = $order->cancel();
+        $this->orderResource->save($order);
+    }
+
+    /**
+     * @param Order $order
+     */
+    private function restoreQuote(Order $order)
+    {
+        if (!$this->_checkoutSession->restoreQuote()) {
+            $this->logger->addError(__METHOD__ . " Failed to restore the quote.");
+
+            return;
+        }
+
+        if (!$this->restoreCustomer($order)) {
+            return;
+        }
+
+        $this->logger->addInfo(__METHOD__ . " Quote has been restored.");
     }
 }
