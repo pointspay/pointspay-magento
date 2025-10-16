@@ -130,6 +130,8 @@ class Success extends AbstractApi
         $this->_checkoutSession->setLastOrderId($order->getId());
         $this->_checkoutSession->setLastRealOrderId($order->getIncrementId());
         $this->_checkoutSession->setLastOrderStatus($order->getStatus());
+        $this->_restoreData->restoreCustomer($order);
+
         $this->_redirect("checkout/onepage/success", [
                 "_secure" => true
         ]);
