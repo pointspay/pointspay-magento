@@ -134,11 +134,9 @@
         <arguments>
             <argument name="validators" xsi:type="array">
                 <item name="message_structure" xsi:type="string">Pointspay\Pointspay\Gateway\Validator\MessageStructureValidator</item>
-                <item name="signature" xsi:type="string">Pointspay\Pointspay\Gateway\Validator\ResponseSignatureValidator</item>
             </argument>
             <argument name="chainBreakingValidators" xsi:type="array">
                 <item name="message_structure" xsi:type="string">Pointspay\Pointspay\Gateway\Validator\MessageStructureValidator</item>
-                <item name="signature" xsi:type="string">Pointspay\Pointspay\Gateway\Validator\ResponseSignatureValidator</item>
             </argument>
         </arguments>
     </virtualType>
@@ -146,11 +144,9 @@
         <arguments>
             <argument name="validators" xsi:type="array">
                 <item name="message_structure" xsi:type="string">Pointspay\Pointspay\Gateway\Validator\RefundMessageStructureValidator</item>
-                <item name="signature" xsi:type="string">Pointspay\Pointspay\Gateway\Validator\ResponseSignatureValidator</item>
             </argument>
             <argument name="chainBreakingValidators" xsi:type="array">
                 <item name="message_structure" xsi:type="string">Pointspay\Pointspay\Gateway\Validator\MessageStructureValidator</item>
-                <item name="signature" xsi:type="string">Pointspay\Pointspay\Gateway\Validator\ResponseSignatureValidator</item>
             </argument>
         </arguments>
     </virtualType>

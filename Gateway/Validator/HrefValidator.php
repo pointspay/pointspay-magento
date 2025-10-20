@@ -2,12 +2,10 @@
 
 namespace Pointspay\Pointspay\Gateway\Validator;
 
-use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Validator\Url as UrlValidator;
 use Magento\Payment\Gateway\Validator\AbstractValidator;
 use Magento\Payment\Gateway\Validator\ResultInterfaceFactory;
-use Pointspay\Pointspay\Service\Signature\Validator as SignatureValidator;
 
 class HrefValidator extends AbstractValidator
 {
