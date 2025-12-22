@@ -42,6 +42,20 @@ class Fieldset extends \Magento\Config\Block\System\Config\Form\Fieldset
         return $html;
     }
 
+    protected function _getFieldsetCss()
+    {
+        /** @var \Magento\Config\Model\Config\Structure\Element\Group $group */
+        $group = $this->getGroup();
+
+        if (!$group) {
+            return 'config admin__collapsible-block';
+        }
+
+        $configCss = $group->getFieldsetCss();
+        return 'config admin__collapsible-block' . ($configCss ? ' ' . $configCss : '');
+    }
+
+
     /**
      * Get collapsed state on-load
      *

@@ -2,12 +2,18 @@
 
 namespace Pointspay\Pointspay\Block\Adminhtml\System\Config;
 
+use Magento\Backend\Block\Context;
+use Magento\Backend\Model\Auth\Session;
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Config\Block\System\Config\Form\Fieldset;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Serialize\SerializerInterface;
+use Magento\Framework\View\Helper\Js;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Pointspay\Pointspay\Block\System\Config\DownloadCertificate;
 use Psr\Log\LoggerInterface;
 
@@ -88,10 +94,14 @@ class CustomFieldset extends Fieldset
 
     /**
      * CustomFieldset constructor.
-     * @param \Magento\Backend\Block\Template\Context $context
+     *
+     * @param Context $context
+     * @param Session $authSession
+     * @param Js $jsHelper
+     * @param ScopeConfigInterface $scopeConfig
+     * @param SerializerInterface $serializer
+     * @param StoreManagerInterface $storeManager
      * @param LoggerInterface $logger
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Framework\Serialize\SerializerInterface $serializer
      * @param array $data
      */
     public function __construct(
@@ -101,12 +111,14 @@ class CustomFieldset extends Fieldset
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Framework\Serialize\SerializerInterface   $serializer,
         \Magento\Store\Model\StoreManagerInterface         $storeManager,
+        LoggerInterface                                    $logger,
         array                                              $data = []
     )
     {
         $this->scopeConfig = $scopeConfig;
         $this->serializer = $serializer;
         $this->storeManager = $storeManager;
+        $this->logger = $logger;
         parent::__construct($context, $authSession, $jsHelper, $data);
     }
 
